@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KALYPSO, a desktop workspace for AI agents</title>
+  <meta name="description" content="Run and supervise AI agents in sandboxes you control. Secrets, budgets, policies and approvals, kept apart by namespaces. Free and open source for Windows, macOS and Linux.">
+  <meta property="og:title" content="KALYPSO">
+  <meta property="og:description" content="A desktop workspace for running and supervising AI agents.">
+  <meta property="og:image" content="assets/overview-dark.png">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="#top" aria-label="KALYPSO home">
+      <img src="assets/logo-dark.png" alt="" width="34" height="26">
+      <span>KALYPSO</span>
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#features">Features</a>
+      <a href="#screens">Screens</a>
+      <a href="#download">Download</a>
+      <a href="https://github.com/kalyppso/kalypso" class="gh">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-text">
+        <h1>Run AI agents in sandboxes <em>you</em> control.</h1>
+        <p class="lede">KALYPSO is a desktop workspace for your agents. Each one works in a hardened sandbox, uses only the secrets you hand it, stays inside a budget, and asks before it does anything you've marked as risky.</p>
+        <div class="cta">
+          <a class="btn primary" id="hero-download" href="https://github.com/kalyppso/kalypso/releases/latest">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 19h16" /></svg>
+            <span id="hero-label">Download for Windows</span>
+          </a>
+          <a class="btn ghost" href="#download">Other platforms</a>
+        </div>
+        <p class="meta" id="hero-meta">Free and open source · also for macOS and Linux</p>
+      </div>
+      <figure class="window hero-shot">
+        <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+        <img src="assets/overview-dark.png" alt="The KALYPSO Overview: quick actions for agents, tasks, sandboxes and secrets above a year of commits" width="1600" height="953">
+      </figure>
+    </section>
+
+    <section id="features" class="section">
+      <h2>Everything an agent needs, nothing it shouldn't have.</h2>
+      <div class="bento">
+        <article class="cell wide">
+          <h3>Sandboxes</h3>
+          <p>Every agent runs in a container with a read-only root, no Linux capabilities and its own network. Docker or Podman today, microVMs next. Open a real shell in any of them, split as many ways as you like.</p>
+        </article>
+        <article class="cell">
+          <h3>Namespaces</h3>
+          <p>Personal, work, a client: separate networks, keys, budgets and policies. Nothing crosses over.</p>
+        </article>
+        <article class="cell">
+          <h3>Secrets vault</h3>
+          <p>Encrypted per namespace and handed to agents as files, never in prompts. Provider keys never enter a sandbox at all.</p>
+        </article>
+        <article class="cell">
+          <h3>Model gateway</h3>
+          <p>Every model call goes through a local proxy that holds the real keys and meters each token. Anthropic and any OpenAI-compatible API.</p>
+        </article>
+        <article class="cell">
+          <h3>Budgets</h3>
+          <p>Daily, monthly and per-run caps that pause an agent, switch it to a cheaper model, or just tell you.</p>
+        </article>
+        <article class="cell wide">
+          <h3>Policies and approvals</h3>
+          <p>Plain-language rules like “never force-push to main”, checked before every tool call. Block, warn, or hold the call until you approve it, from wherever you are in the app.</p>
+          <code class="snippet">git push --force origin main <span>→ blocked by “No force-push to main”</span></code>
+        </article>
+        <article class="cell">
+          <h3>Tracker</h3>
+          <p>A board of what each agent is working on, with time, cost and the pull request it opened.</p>
+        </article>
+        <article class="cell wide">
+          <h3>Integrations</h3>
+          <p>Obsidian, Notion, Confluence, GitHub, Jira, Linear, any MCP server or REST API. Mark a notes app as a brain and agents share it as long-term memory. Install skills straight from GitHub.</p>
+        </article>
+        <article class="cell">
+          <h3>Code only when you ask</h3>
+          <p>Configs, specs and diffs stay folded until you open them.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="screens" class="section">
+      <h2>Yours to look at, too.</h2>
+      <p class="sub">Black, White and Blossom themes, or your own colours and font.</p>
+      <div class="themes">
+        <figure><img src="assets/overview-dark.png" alt="Overview in the Black theme" loading="lazy"><figcaption>Black</figcaption></figure>
+        <figure><img src="assets/overview-light.png" alt="Overview in the White theme" loading="lazy"><figcaption>White</figcaption></figure>
+        <figure><img src="assets/overview-blossom.png" alt="Overview in the Blossom theme" loading="lazy"><figcaption>Blossom</figcaption></figure>
+      </div>
+      <div class="shots">
+        <figure class="window"><div class="window-bar" aria-hidden="true"><i></i><i></i><i></i></div><img src="assets/tracker.png" alt="The Tracker board" loading="lazy"><figcaption>Tracker</figcaption></figure>
+        <figure class="window"><div class="window-bar" aria-hidden="true"><i></i><i></i><i></i></div><img src="assets/terminals.png" alt="Four terminals split into a grid" loading="lazy"><figcaption>Split terminals</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="download" class="section download">
+      <h2>Download KALYPSO</h2>
+      <p class="sub" id="release-line">The latest release, straight from GitHub.</p>
+      <div class="platforms">
+        <article class="platform" data-os="windows">
+          <h3>Windows</h3>
+          <p class="faint">Windows 10 and 11, 64-bit</p>
+          <a class="btn primary" data-asset="exe" href="https://github.com/kalyppso/kalypso/releases/latest">Download .exe installer</a>
+          <a class="alt" data-asset="msi" href="https://github.com/kalyppso/kalypso/releases/latest">or the .msi package</a>
+        </article>
+        <article class="platform" data-os="mac">
+          <h3>macOS</h3>
+          <p class="faint">Apple silicon</p>
+          <a class="btn" data-asset="dmg" href="https://github.com/kalyppso/kalypso/releases/latest">Download .dmg</a>
+        </article>
+        <article class="platform" data-os="linux">
+          <h3>Linux</h3>
+          <p class="faint">x86_64</p>
+          <a class="btn" data-asset="appimage" href="https://github.com/kalyppso/kalypso/releases/latest">Download .AppImage</a>
+          <a class="alt" data-asset="deb" href="https://github.com/kalyppso/kalypso/releases/latest">.deb</a>
+          <a class="alt" data-asset="rpm" href="https://github.com/kalyppso/kalypso/releases/latest">.rpm</a>
+        </article>
+      </div>
+      <p class="note">KALYPSO is early software and its installers aren't code-signed yet. On Windows, SmartScreen may say it doesn't recognise the app: choose <strong>More info</strong>, then <strong>Run anyway</strong>. For sandboxes, install Docker Desktop or Podman.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>KALYPSO · open source</span>
+    <span class="spacer"></span>
+    <a href="https://github.com/kalyppso/kalypso">GitHub</a>
+    <a href="https://github.com/kalyppso/kalypso/issues/41">Roadmap</a>
+    <a href="https://github.com/kalyppso/kalypso/releases">Releases</a>
+  </footer>
+
+  <script src="main.js" defer></script>
+</body>
+</html>
