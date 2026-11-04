@@ -3,6 +3,7 @@
 // it only fills in real file names, sizes and star counts when it can.
 
 const REPO = "kalyppso/kalypso";
+document.documentElement.classList.add("js");
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
@@ -113,6 +114,79 @@ $(".scenarios").addEventListener("keydown", (e) => {
 });
 showScenario("push");
 
+/* ---------- Hero: an agent at work ---------- */
+
+// The shape of a real run: what the Claude Agent SDK runtime writes to the transcript.
+const DEMO = [
+  ["status", "started · claude-sonnet-5-5 · 22 tools", 500],
+  ["text", "I'll run the tests first to see what fails.", 900],
+  ["tool", "Bash|npm test", 700, { check: 1, spend: 0.004 }],
+  ["output", "23 passing, 1 failing: parses an empty config file", 900],
+  ["tool", "Read|src/config.ts", 600, { check: 1, spend: 0.006 }],
+  ["tool", "Edit|src/config.ts", 900, { check: 1, spend: 0.009 }],
+  ["tool", "Bash|npm test", 700, { check: 1, spend: 0.004 }],
+  ["output", "24 passing", 900],
+  ["tool", "Bash|git push --force origin main", 800, { check: 1, spend: 0.003 }],
+  ["policy", 'Blocked by policy <b>"No force-push to main"</b>. The command never ran.', 1500, { blocked: 1 }],
+  ["text", "Force-pushing to main isn't allowed here. I'll push a branch and open a pull request instead.", 1000, { spend: 0.005 }],
+  ["tool", "Bash|git push origin fix/empty-config", 800, { check: 1, spend: 0.003 }],
+  ["tool", "Bash|gh pr create --fill", 900, { check: 1, spend: 0.004 }],
+  ["output", "https://github.com/acme/app/pull/482", 700],
+  ["result", "Done · 9 turns · $0.042", 4500, { done: true }],
+];
+
+function demo() {
+  const log = $("#demo-log");
+  if (!log) return;
+  const status = $("#demo-status");
+  const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  let i = 0, spend = 0.8, checks = 0, blocked = 0, timer = null, visible = true;
+  const meter = () => {
+    $("#demo-spend").textContent = `$${spend.toFixed(2)}`;
+    $("#demo-meter").style.width = `${Math.min(100, (spend / 5) * 100)}%`;
+    $("#demo-checks").textContent = checks;
+    $("#demo-blocked").textContent = blocked;
+  };
+  const line = ([kind, text], animate = true) => {
+    const li = document.createElement("li");
+    li.className = `k-${kind}${animate ? " new" : ""}`;
+    if (kind === "tool") { const [tool, arg] = text.split("|"); li.innerHTML = `<b>${tool}</b>${esc(arg)}`; }
+    else if (kind === "policy") li.innerHTML = text;
+    else li.textContent = text;
+    log.append(li);
+    while (log.children.length > 24) log.firstElementChild.remove();
+  };
+  const apply = (fx = {}) => {
+    checks += fx.check || 0; blocked += fx.blocked || 0; spend += (fx.spend || 0) * 3;
+    if (fx.done) { status.classList.add("done"); status.lastChild.textContent = "Waiting for a message"; }
+    meter();
+  };
+  const reset = () => {
+    log.replaceChildren(); i = 0; checks = 0; blocked = 0; spend = 0.8;
+    status.classList.remove("done"); status.lastChild.textContent = "Running"; meter();
+  };
+  const step = () => {
+    timer = null;
+    if (!visible) return;
+    if (i >= DEMO.length) { reset(); timer = setTimeout(step, 600); return; }
+    const s = DEMO[i++];
+    line(s); apply(s[3]);
+    timer = setTimeout(step, s[2]);
+  };
+  // Reduced motion: the finished run, still.
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    DEMO.forEach((s) => { line(s, false); apply(s[3]); });
+    return;
+  }
+  meter();
+  // Only play while it's on screen.
+  new IntersectionObserver(([e]) => {
+    visible = e.isIntersecting;
+    if (visible && !timer) timer = setTimeout(step, 400);
+  }).observe($(".stage"));
+}
+demo();
+
 /* ---------- Themes ---------- */
 
 const THEMES = { dark: ["overview-dark.png", "Black"], light: ["overview-light.png", "White"], blossom: ["overview-blossom.png", "Blossom"] };
@@ -142,10 +216,21 @@ const PICK = {
   rpm: (n) => /\.rpm$/i.test(n),
 };
 const PLATFORMS = {
-  windows: { name: "Windows", req: "Windows 10 and 11, 64-bit", asset: "exe", icon: "exe" },
-  mac: { name: "macOS", req: "Apple silicon (M1 and later)", asset: "dmg", icon: "dmg" },
-  linux: { name: "Linux", req: "x86_64, any recent distribution", asset: "appimage", icon: "appimage" },
+  windows: {
+    name: "Windows", req: "Windows 10 and 11, 64-bit", asset: "exe", icon: "exe",
+    note: "Not code-signed yet: if SmartScreen stops the installer, choose <strong>More info</strong>, then <strong>Run anyway</strong>.",
+  },
+  mac: {
+    name: "macOS", req: "macOS 11 or later", asset: "dmg", icon: "dmg",
+    note: "Not notarized yet: if macOS won't open it, go to <strong>System Settings, then Privacy &amp; Security</strong> and choose <strong>Open Anyway</strong>.",
+  },
+  linux: {
+    name: "Linux", req: "x86_64, any recent distribution", asset: "appimage", icon: "appimage",
+    note: "Make the AppImage executable (<code>chmod +x</code>) and run it, or use the .deb or .rpm below.",
+  },
 };
+/** What a macOS build runs on, from its file name. */
+const macArch = (name) => (/universal/i.test(name) ? "Apple silicon and Intel" : /aarch64|arm64/i.test(name) ? "Apple silicon" : /x64|x86_64/i.test(name) ? "Intel" : "");
 const mb = (b) => `${Math.max(1, Math.round(b / 1048576))} MB`;
 
 function platform() {
@@ -167,13 +252,16 @@ function applyPlatform(os, release) {
   const p = PLATFORMS[os];
   const asset = release?.assets.find((a) => PICK[p.asset](a.name));
   $("#hero-label").textContent = `Download for ${p.name}`;
+  $$("[data-dl-label]").forEach((el) => (el.textContent = `Download for ${p.name}`));
   $("#dl-name").textContent = p.name;
-  $("#dl-req").textContent = p.req;
+  $("#dl-req").textContent = os === "mac" && asset && macArch(asset.name) ? `${p.req}, ${macArch(asset.name)}` : p.req;
+  $("#dl-note").innerHTML = p.note;
   // The matching icon, copied from the list below so it stays one icon family.
   const icon = $(`.dl-all li[data-asset="${p.icon}"] .i`);
   if (icon) $("#dl-icon").replaceChildren(icon.cloneNode(true));
   if (asset) {
     $("#hero-download").href = asset.browser_download_url;
+    $$("[data-dl]").forEach((a) => (a.href = asset.browser_download_url));
     $("#dl-button").href = asset.browser_download_url;
     $("#dl-label").textContent = `Download for ${p.name}`;
     $("#dl-file").textContent = `${asset.name} · ${mb(asset.size)}`;
@@ -185,6 +273,7 @@ function applyRelease(release) {
     const asset = release.assets.find((a) => PICK[li.dataset.asset](a.name));
     const link = li.querySelector("a");
     if (!asset) { li.hidden = true; continue; }
+    if (li.dataset.asset === "dmg" && macArch(asset.name)) $("#mac-label").textContent = `macOS, ${macArch(asset.name)}`;
     link.href = asset.browser_download_url;
     link.setAttribute("aria-label", `Download ${asset.name}`);
     const size = document.createElement("span");
@@ -194,6 +283,8 @@ function applyRelease(release) {
   }
   const when = new Date(release.published_at).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
   $("#release-line").textContent = `${release.name || release.tag_name}, released ${when}${release.prerelease ? ", an early pre-release" : ""}.`;
+  $("#hero-version").textContent = `${release.tag_name}`;
+  $("#release-pill").href = release.html_url;
 }
 
 (async () => {
@@ -211,7 +302,11 @@ function applyRelease(release) {
 // Star count, shown only when the API answers.
 fetch(`https://api.github.com/repos/${REPO}`)
   .then((r) => (r.ok ? r.json() : null))
-  .then((repo) => { if (repo && repo.stargazers_count > 0) $("#stars").textContent = repo.stargazers_count.toLocaleString(); })
+  .then((repo) => {
+    // A small number reads worse than none: show it once it means something.
+    if (!repo || !(repo.stargazers_count >= 50)) return;
+    $$("[data-stars]").forEach((el) => { el.textContent = repo.stargazers_count.toLocaleString(); el.hidden = false; });
+  })
   .catch(() => {});
 
 /* ---------- Page chrome ---------- */
