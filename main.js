@@ -5,6 +5,7 @@ const REPO = "kalyppso/kalypso";
 document.documentElement.classList.add("js");
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ---------- The live window ---------- */
 
@@ -160,3 +161,60 @@ const io = new IntersectionObserver(
   { rootMargin: "0px 0px -10% 0px" },
 );
 $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observe(el); });
+
+/* ---------- Layers ---------- */
+
+// A tab list: click, or use the arrow keys, Home and End. The panel shows the real
+// KALYPSO screen for the chosen layer, cross-fading between them.
+(function layers() {
+  const tabs = $$('.lx-list [role="tab"]');
+  const panel = $("#lx-panel");
+  if (!tabs.length || !panel) return;
+  const pics = $$(".lx-screen picture");
+  const select = (tab, focus = false) => {
+    tabs.forEach((t) => {
+      const on = t === tab;
+      t.setAttribute("aria-selected", String(on));
+      t.tabIndex = on ? 0 : -1;
+    });
+    pics.forEach((p) => p.classList.toggle("on", p.dataset.l === tab.dataset.l));
+    panel.setAttribute("aria-labelledby", tab.id);
+    if (focus) tab.focus();
+    // On phones the tabs scroll sideways: keep the chosen one in view.
+    tab.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reduce ? "auto" : "smooth" });
+  };
+  tabs.forEach((t) => t.addEventListener("click", () => select(t)));
+  $(".lx-list").addEventListener("keydown", (e) => {
+    const i = tabs.indexOf(document.activeElement);
+    if (i < 0) return;
+    const go = { ArrowDown: i + 1, ArrowRight: i + 1, ArrowUp: i - 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+    if (go === undefined) return;
+    e.preventDefault();
+    select(tabs[(go + tabs.length) % tabs.length], true);
+  });
+  // Load every screen once the section is near, so switching never waits on the network.
+  new IntersectionObserver(([e], obs) => {
+    if (!e.isIntersecting) return;
+    $$(".lx-screen img").forEach((img) => (img.loading = "eager"));
+    obs.disconnect();
+  }, { rootMargin: "400px 0px" }).observe(panel);
+})();
+
+/* ---------- The section you're in ---------- */
+
+(function navActive() {
+  const links = $$('.nav-link[href^="#"]');
+  const targets = links.map((a) => $(a.getAttribute("href"))).filter(Boolean);
+  if (!targets.length) return;
+  // The section crossing the upper middle of the screen is the one you're in.
+  const watch = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        links.forEach((a) => a.classList.toggle("on", a.getAttribute("href") === `#${e.target.id}`));
+      }
+    },
+    { rootMargin: "-40% 0px -55% 0px" },
+  );
+  targets.forEach((t) => watch.observe(t));
+})();
