@@ -231,40 +231,29 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
   }
 })();
 
-/* ---------- The stack, isometric: hover a part ---------- */
+/* ---------- The island: point at a layer ---------- */
 
-(function iso() {
-  const svg = $("#iso");
-  if (!svg) return;
-  const hint = $("#iso-hint");
-  const SAY = {
-    claude: "Claude Code runs in a sandbox, with only a KALYPSO key.",
-    sdk: "Agents built on the Claude Agent SDK, supervised and restarted if they crash.",
-    scripts: "Any program you start in a sandbox gets the same guard rails.",
-    core: "Four layers: every call is checked by policy, contained by the sandbox, given secrets by the vault and metered by the gateway.",
-    anthropic: "The real Anthropic key is added here, never inside a sandbox.",
-    compat: "OpenAI-compatible APIs work too: OpenRouter, vLLM and others.",
-    ollama: "Or a model on your own machine, through the same gateway.",
-    you: "Risky calls wait for your answer. No answer means no.",
+(function isle() {
+  const box = $(".isle");
+  if (!box) return;
+  const map = $("#isle", box);
+  const rows = $$(".xr-steps li", box);
+  // Point at a ring or a row: that layer lights up on both sides.
+  const pick = (key) => {
+    if (key) box.dataset.on = key; else delete box.dataset.on;
+    rows.forEach((r) => r.classList.toggle("on", r.dataset.layer === key));
   };
-  const show = (node) => {
-    $$(".node.on, .wire.on", svg).forEach((el) => el.classList.remove("on"));
-    if (!node) { hint.textContent = "Hover a part"; hint.classList.remove("said"); return; }
-    const id = node.dataset.part;
-    node.classList.add("on");
-    // Light the wires that touch this part (the core touches them all).
-    $$(".wire", svg).forEach((w) => { if (id === "core" || w.dataset.to === id) w.classList.add("on"); });
-    hint.textContent = SAY[id] || "";
-    hint.classList.add("said");
-  };
-  svg.addEventListener("mouseover", (e) => show(e.target.closest(".node")));
-  svg.addEventListener("mouseleave", () => show(null));
-  svg.addEventListener("focusin", (e) => show(e.target.closest(".node")));
-  svg.addEventListener("focusout", () => show(null));
-  svg.addEventListener("click", (e) => show(e.target.closest(".node"))); // touch
-  // The packets only move while the diagram is on screen, and never with reduced motion.
-  if (reduce) { svg.pauseAnimations(); return; }
-  new IntersectionObserver(([e]) => (e.isIntersecting ? svg.unpauseAnimations() : svg.pauseAnimations())).observe(svg);
+  const layerOf = (e) => e.target.closest("[data-layer]")?.dataset.layer || null;
+  for (const el of [map, $(".xr-steps", box)]) {
+    el.addEventListener("mouseover", (e) => pick(layerOf(e)));
+    el.addEventListener("mouseleave", () => pick(null));
+    el.addEventListener("focusin", (e) => pick(layerOf(e)));
+    el.addEventListener("focusout", () => pick(null));
+    el.addEventListener("click", (e) => pick(layerOf(e))); // touch
+  }
+  // The calls only move while the map is on screen, and never with reduced motion.
+  if (reduce) { map.pauseAnimations(); return; }
+  new IntersectionObserver(([e]) => (e.isIntersecting ? map.unpauseAnimations() : map.pauseAnimations())).observe(map);
 })();
 
 /* ---------- In the app: tabs over real screens ---------- */
@@ -272,49 +261,31 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
 (function showcase() {
   const tabs = $$(".show-tabs [role=tab]");
   if (!tabs.length) return;
+  const row = $(".show-tabs");
   const panel = $("#show-panel");
-  const SHOW_MS = 7000;
-  let current = 0, started = 0, raf = null, paused = false, visible = false, auto = !reduce;
+  // Tabs change only when you pick one: nothing moves on its own while you scroll.
   const select = (i, focus = false) => {
-    current = (i + tabs.length) % tabs.length;
+    const current = (i + tabs.length) % tabs.length;
     const key = tabs[current].dataset.tab;
     tabs.forEach((t, n) => {
-      const on = n === current;
-      t.setAttribute("aria-selected", String(on));
-      t.tabIndex = on ? 0 : -1;
-      t.querySelector(".bar").style.setProperty("--p", on && auto ? 0 : 1);
+      t.setAttribute("aria-selected", String(n === current));
+      t.tabIndex = n === current ? 0 : -1;
     });
     $$(".show-shot, .show-copy").forEach((el) => el.classList.toggle("on", el.dataset.tab === key));
     panel.setAttribute("aria-labelledby", tabs[current].id);
-    if (focus) tabs[current].focus();
-    tabs[current].scrollIntoView({ block: "nearest", inline: "nearest" });
-    started = performance.now();
+    if (focus) tabs[current].focus({ preventScroll: true });
+    // Keep the chosen tab visible in its own row (phones), without moving the page.
+    const t = tabs[current];
+    if (t.offsetLeft < row.scrollLeft || t.offsetLeft + t.offsetWidth > row.scrollLeft + row.clientWidth)
+      row.scrollTo({ left: t.offsetLeft - 8, behavior: reduce ? "auto" : "smooth" });
   };
-  // Each tab's bar fills while it's shown; then the next one takes over. Choosing a tab stops it.
-  const tick = (now) => {
-    raf = null;
-    if (!auto || !visible) return;
-    if (paused) started = now - (Number(tabs[current].querySelector(".bar").style.getPropertyValue("--p")) || 0) * SHOW_MS;
-    const p = Math.min(1, (now - started) / SHOW_MS);
-    tabs[current].querySelector(".bar").style.setProperty("--p", p);
-    if (p >= 1) select(current + 1);
-    raf = requestAnimationFrame(tick);
-  };
-  const stopAuto = () => { auto = false; tabs.forEach((t) => t.querySelector(".bar").style.setProperty("--p", 1)); };
-  tabs.forEach((t, i) => t.addEventListener("click", () => { stopAuto(); select(i); }));
-  $(".show-tabs").addEventListener("keydown", (e) => {
-    const go = { ArrowRight: current + 1, ArrowLeft: current - 1, Home: 0, End: tabs.length - 1 }[e.key];
+  tabs.forEach((t, i) => t.addEventListener("click", () => select(i)));
+  row.addEventListener("keydown", (e) => {
+    const now = tabs.findIndex((t) => t.getAttribute("aria-selected") === "true");
+    const go = { ArrowRight: now + 1, ArrowLeft: now - 1, Home: 0, End: tabs.length - 1 }[e.key];
     if (go === undefined) return;
     e.preventDefault();
-    stopAuto();
     select(go, true);
   });
-  const show = $(".show");
-  show.addEventListener("mouseenter", () => (paused = true));
-  show.addEventListener("mouseleave", () => (paused = false));
-  new IntersectionObserver(([e]) => {
-    visible = e.isIntersecting;
-    if (visible && auto && !raf) { started = performance.now(); raf = requestAnimationFrame(tick); }
-  }, { threshold: 0.35 }).observe(show);
   select(0);
 })();

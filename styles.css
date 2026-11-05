@@ -242,47 +242,67 @@ h2 { font-size: clamp(30px, 3.6vw, 44px); line-height: 1.08; letter-spacing: -0.
 /* ---------- Layers ---------- */
 main > .layers { padding-top: 96px; padding-bottom: 104px; }
 .layers .sub { margin: 0 0 40px; }
-/* ---------- The stack, drawn isometric ---------- */
-.iso-frame { position: relative; border: 1px solid var(--line-2); border-radius: 16px; background: #0b0a0e; overflow: hidden; }
-.iso { display: block; width: 100%; height: auto; font-family: var(--font); }
-.iso rect, .iso .wire, .iso .arrow, .iso .packet { pointer-events: none; }
-.iso .grid { fill: none; stroke: rgba(255, 255, 255, 0.035); stroke-width: 1; }
-.iso .top { fill: #100f14; stroke: #5d5b66; stroke-width: 1.3; stroke-linejoin: round; transition: stroke 0.3s, fill 0.3s; }
-.iso .side { fill: #0c0b10; stroke: #5d5b66; stroke-width: 1.3; stroke-linejoin: round; transition: stroke 0.3s; }
-.iso .inner { fill: none; stroke: #33323a; stroke-width: 1; }
-.iso .glyph { fill: #d4d2dc; transition: fill 0.3s; }
-.iso .pixel { fill: #e6e3ef; }
-.iso .wire { fill: none; stroke: #45434d; stroke-width: 1.3; transition: stroke 0.3s; }
-.iso .wire.dashed { stroke-dasharray: 5 6; }
-.iso .arrow { fill: none; stroke: #6a6874; stroke-width: 1.3; }
-.iso .cube-top { fill: #f2f0f7; }
-.iso .cube-l { fill: #b9b5c6; }
-.iso .cube-r { fill: #8a8697; }
-.iso text { fill: var(--text-2); }
-.iso .h-title { font-size: 30px; font-weight: 500; letter-spacing: -0.02em; fill: var(--text); }
-.iso .h-sub, .iso .h-col, .iso .h-flow, .iso .you-line, .iso .plate-label { font-family: var(--mono); font-size: 15px; letter-spacing: 0.14em; fill: var(--text-3); }
-.iso .n-label { font-size: 22px; fill: var(--text); }
-.iso .n-sub { font-size: 16px; fill: var(--text-3); }
-.iso .you-title { font-size: 26px; fill: var(--text); }
-.iso .you-led { fill: var(--accent-hi); }
-.iso .you-row { fill: #2b2a32; }
-.iso .you-dot { fill: #4b4955; }
-.iso .you-dot.on { fill: var(--accent-hi); }
-.iso .plate-label { opacity: 0; transition: opacity 0.3s; font-size: 13px; }
-.iso .plate { transition: transform 0.6s var(--ease); }
-.iso .node { cursor: pointer; outline: none; }
-/* Pointing at a part lights it and its wires. */
-.iso .node:hover .top, .iso .node:focus-visible .top, .iso .node.on .top { stroke: var(--accent-hi); }
-.iso .node:hover .side, .iso .node:focus-visible .side, .iso .node.on .side { stroke: var(--accent-hi); }
-.iso .wire.on { stroke: var(--accent-hi); }
-/* The core opens up to show its four layers. */
-.iso .core:hover .plate, .iso .core:focus-visible .plate, .iso .core.on .plate { transform: translateY(calc(var(--i, -1) * 10px + 8px)); }
-.iso .core:hover .plate-top, .iso .core:focus-visible .plate-top, .iso .core.on .plate-top { transform: translateY(-10px); }
-.iso .core:hover .plate-label, .iso .core:focus-visible .plate-label, .iso .core.on .plate-label { opacity: 1; }
-.iso-foot { position: absolute; left: 20px; right: 20px; bottom: 16px; display: flex; justify-content: space-between; gap: 24px; font: 500 12px var(--mono); letter-spacing: 0.12em; color: var(--text-3); pointer-events: none; }
-.iso-foot #iso-hint { text-transform: uppercase; max-width: 70%; }
-.iso-foot #iso-hint.said { text-transform: none; letter-spacing: 0.02em; font-size: 13.5px; color: var(--text-2); }
-@media (prefers-reduced-motion: reduce) { .iso .packet { display: none; } }
+/* ---------- The island: each layer a contour ring, and one call x-rayed ---------- */
+.isle { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: center; border: 1px solid var(--line-2); border-radius: 16px; background: #09080c; overflow: hidden; }
+.isle-map { display: block; width: 100%; height: auto; padding: 12px 8px; font-family: var(--mono); }
+.isle-map .contour { fill: none; stroke: rgba(255, 255, 255, 0.05); stroke-width: 1; }
+.isle-map .contour.sea { stroke-dasharray: 2 6; }
+/* Flat steps of tint, higher ground a little lighter: no gradients. */
+.isle-map .band { cursor: pointer; outline: none; }
+.isle-map .ring { fill: rgba(167, 139, 250, 0.028); stroke: #3d3a48; stroke-width: 1.2; transition: stroke 0.3s, fill 0.3s; }
+.isle-map .r-label { font-size: 15px; letter-spacing: 0.24em; fill: var(--text-3); transition: fill 0.3s; }
+.isle-map .call { fill: none; stroke: #4a4656; stroke-width: 1; stroke-dasharray: 3 4; pointer-events: none; }
+.isle-map .model-dot { fill: var(--text-2); }
+.isle-map .m-label { font: 500 20px var(--font); fill: var(--text); }
+.isle-map .agent { fill: var(--accent-hi); }
+.isle-map .agent-halo { fill: none; stroke: var(--accent-hi); stroke-opacity: 0.45; }
+.isle-map .a-label { font-size: 15px; letter-spacing: 0.22em; fill: var(--text-2); }
+.isle-map .stop path { stroke: #e5484d; stroke-width: 2.4; stroke-linecap: round; }
+.isle-map .note { font-size: 16px; fill: var(--text-3); }
+.isle-map .ask { fill: none; stroke: var(--accent-hi); stroke-width: 1.2; }
+.isle-map .packet { fill: var(--text); pointer-events: none; }
+.isle-map .packet.bad { fill: #e5484d; }
+.isle-map .note, .isle-map .stop, .isle-map .ask, .isle-map .agent, .isle-map .agent-halo, .isle-map .a-label, .isle-map .m-label, .isle-map .model-dot { pointer-events: none; }
+/* One layer picked: its ring and its row light up, the rest step back. */
+.isle[data-on] .ring { stroke: #2b2933; }
+.isle[data-on] .r-label { fill: #4b4855; }
+.isle[data-on="sandbox"] [data-layer="sandbox"] .ring, .isle[data-on="policies"] [data-layer="policies"] .ring,
+.isle[data-on="vault"] [data-layer="vault"] .ring, .isle[data-on="gateway"] [data-layer="gateway"] .ring { stroke: var(--accent-hi); fill: rgba(167, 139, 250, 0.08); }
+.isle[data-on="sandbox"] [data-layer="sandbox"] .r-label, .isle[data-on="policies"] [data-layer="policies"] .r-label,
+.isle[data-on="vault"] [data-layer="vault"] .r-label, .isle[data-on="gateway"] [data-layer="gateway"] .r-label { fill: var(--accent-ink); }
+.isle-map .band:focus-visible .ring { stroke: var(--accent-hi); }
+@media (prefers-reduced-motion: no-preference) {
+  .isle-map .ask { animation: ask 2.4s var(--ease) infinite; transform-box: fill-box; transform-origin: center; }
+}
+@keyframes ask { 0% { transform: scale(0.7); opacity: 1; } 100% { transform: scale(1.9); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .isle-map .packet { display: none; } }
+
+/* The x-ray: the same call, one row per layer. */
+.xray { display: flex; flex-direction: column; gap: 14px; padding: 26px 26px 24px; border-left: 1px solid var(--line-2); font-size: 14px; }
+.xr-head { display: flex; justify-content: space-between; margin: 0; font: 500 11.5px var(--mono); letter-spacing: 0.14em; color: var(--text-3); }
+.xray code { font: 500 12.5px var(--mono); }
+.xr-req, .xr-out { margin: 0; color: var(--text-2); }
+.xr-out { color: var(--accent-ink); }
+.xr-steps { list-style: none; margin: 0; padding: 0; border-left: 1px dashed var(--line-3); }
+.xr-steps li { display: grid; gap: 3px; padding: 11px 0 11px 18px; margin-left: -1px; border-left: 1px solid transparent; cursor: pointer; outline: none; transition: border-color 0.3s, opacity 0.3s; }
+.xr-k { font: 500 11.5px var(--mono); letter-spacing: 0.16em; color: var(--text); }
+.xr-t { color: var(--text-2); line-height: 1.45; }
+.xr-steps code { color: var(--text-3); transition: color 0.3s; }
+.isle[data-on] .xr-steps li { opacity: 0.42; }
+.isle[data-on] .xr-steps li.on { opacity: 1; border-left-color: var(--accent-hi); }
+.isle[data-on] .xr-steps li.on code { color: var(--accent-ink); }
+.xr-steps li:focus-visible { border-left-color: var(--accent-hi); }
+@media (max-width: 1080px) {
+  .isle { grid-template-columns: minmax(0, 1fr); }
+  .xray { border-left: 0; border-top: 1px solid var(--line-2); }
+}
+@media (max-width: 640px) {
+  .isle-map .m-label { font-size: 21px; }
+  .isle-map .r-label, .isle-map .a-label { font-size: 19px; letter-spacing: 0.14em; }
+  /* On a phone the x-ray right below says the same thing. */
+  .isle-map .note { display: none; }
+  .xray { padding: 20px 18px; }
+}
 
 /* ---------- In the app: tabs over real screens ---------- */
 .show { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 48px; margin-top: 96px; align-items: start; }
@@ -291,7 +311,7 @@ main > .layers { padding-top: 96px; padding-bottom: 104px; }
 .show-copy.on { opacity: 1; transform: none; pointer-events: auto; }
 .show-copy h3 { margin: 0 0 14px; font-size: clamp(28px, 2.6vw, 38px); line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; }
 .show-copy p { margin: 0; color: var(--text-2); font-size: 16.5px; line-height: 1.55; }
-.show-tabs { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; scrollbar-width: none; }
+.show-tabs { position: relative; display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; scrollbar-width: none; }
 .show-tabs::-webkit-scrollbar { display: none; }
 .show-tabs button {
   position: relative; flex: 1 0 auto; padding: 18px 18px 12px; border: 1px solid var(--line); border-bottom: 0; border-radius: 14px 14px 0 0; background: none;
@@ -332,8 +352,6 @@ main > .layers { padding-top: 96px; padding-bottom: 104px; }
 @media (max-width: 640px) {
   .show-tabs button { padding: 12px 12px 9px; font-size: 12px; }
   .show-shot .callout { font-size: 12px; padding: 6px 10px; white-space: normal; width: max-content; max-width: 46vw; }
-  .iso-foot { font-size: 10px; }
-  .iso-foot #iso-hint.said { font-size: 12px; }
 }
 
 @media (max-width: 1080px) {
