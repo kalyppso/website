@@ -84,6 +84,34 @@ const DEMO = [
   }).observe($(".stage"));
 })();
 
+/* ---------- The stack ---------- */
+
+(function stack() {
+  const items = $$(".layer-list li");
+  const planes = $$(".plane");
+  if (!items.length) return;
+  let current = -1, timer = null, touched = false;
+  const show = (n) => {
+    current = n;
+    items.forEach((li) => li.classList.toggle("on", +li.dataset.l === n));
+    planes.forEach((p) => p.classList.toggle("on", +p.dataset.l === n));
+  };
+  const pick = (n) => { touched = true; clearInterval(timer); show(n); };
+  items.forEach((li) => {
+    li.addEventListener("mouseenter", () => pick(+li.dataset.l));
+    li.addEventListener("focus", () => pick(+li.dataset.l));
+    li.addEventListener("click", () => pick(+li.dataset.l));
+  });
+  planes.forEach((p) => p.addEventListener("click", () => pick(+p.dataset.l)));
+  show(2); // Policies first: the layer most people ask about.
+  // Until someone points at a layer, walk through them while the section is on screen.
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  new IntersectionObserver(([e]) => {
+    clearInterval(timer);
+    if (e.isIntersecting && !touched && !reduce) timer = setInterval(() => show((current + 1) % items.length), 2600);
+  }, { threshold: 0.4 }).observe($(".layers"));
+})();
+
 /* ---------- Downloads ---------- */
 
 const PICK = {
@@ -160,3 +188,5 @@ const io = new IntersectionObserver(
   { rootMargin: "0px 0px -10% 0px" },
 );
 $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observe(el); });
+// The stack spreads its layers apart when it comes into view.
+io.observe($(".layers"));
