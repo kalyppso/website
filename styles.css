@@ -239,39 +239,107 @@ h2 { font-size: clamp(30px, 3.6vw, 44px); line-height: 1.08; letter-spacing: -0.
   .get, .faq { padding-top: 64px !important; padding-bottom: 72px !important; }
 }
 
-/* ---------- Layers: how a call travels, in ASCII ---------- */
+/* ---------- Layers ---------- */
 main > .layers { padding-top: 96px; padding-bottom: 104px; }
 .layers .sub { margin: 0 0 40px; }
-.flow { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 40px; align-items: start; }
-.diagram { margin: 0; font: 500 13px / 1.5 var(--mono); color: var(--text-3); white-space: pre; overflow-x: auto; }
-.diagram .dim { color: var(--text-3); }
-.diagram .wire { color: var(--line-3); transition: color 0.3s var(--ease); }
-.diagram .wire.lit { color: var(--accent-hi); }
-.diagram .you-box { color: var(--line-3); transition: color 0.3s var(--ease); }
-.diagram .you-box.lit { color: var(--accent-hi); }
-.diagram .part { color: var(--text-2); cursor: pointer; border-radius: 3px; outline: none; transition: color 0.25s, background 0.25s; }
-.diagram .part .dnote { color: var(--text-3); transition: color 0.25s; }
-.diagram .part:hover, .diagram .part:focus-visible, .diagram .part.picked { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--text); }
-.diagram .part:focus-visible { box-shadow: 0 0 0 1px var(--accent-hi); }
-.diagram .part.lit, .diagram .part.lit .dnote { color: var(--text); }
-.diagram .part.lit .mark, .diagram .part.stop .mark { color: var(--accent-hi); }
-.diagram .part.stop { color: var(--text); background: color-mix(in srgb, var(--accent) 30%, transparent); }
-.diagram .model { transition: color 0.3s, background 0.3s; border-radius: 3px; }
-.diagram .model.lit { color: var(--bg); background: var(--accent-hi); }
-.flow-side { display: grid; gap: 14px; min-width: 0; }
-.flow-status { margin: 0; min-height: 1.5em; font-size: 13px; color: var(--accent-ink); }
-.flow-card h3 { margin: 0 0 6px; font-size: 20px; letter-spacing: -0.02em; }
-.flow-card p { margin: 0 0 18px; color: var(--text-2); font-size: 15px; max-width: 34em; }
-.lx-screen { position: relative; aspect-ratio: 16 / 10; border: 1px solid var(--line-2); border-radius: 12px; overflow: hidden; background: var(--panel); }
-.lx-screen picture { position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s var(--ease); }
-.lx-screen picture.on { opacity: 1; }
-.lx-screen img { width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+/* ---------- The stack, drawn isometric ---------- */
+.iso-frame { position: relative; border: 1px solid var(--line-2); border-radius: 16px; background: #0b0a0e; overflow: hidden; }
+.iso { display: block; width: 100%; height: auto; font-family: var(--font); }
+.iso rect, .iso .wire, .iso .arrow, .iso .packet { pointer-events: none; }
+.iso .grid { fill: none; stroke: rgba(255, 255, 255, 0.035); stroke-width: 1; }
+.iso .top { fill: #100f14; stroke: #5d5b66; stroke-width: 1.3; stroke-linejoin: round; transition: stroke 0.3s, fill 0.3s; }
+.iso .side { fill: #0c0b10; stroke: #5d5b66; stroke-width: 1.3; stroke-linejoin: round; transition: stroke 0.3s; }
+.iso .inner { fill: none; stroke: #33323a; stroke-width: 1; }
+.iso .glyph { fill: #d4d2dc; transition: fill 0.3s; }
+.iso .pixel { fill: #e6e3ef; }
+.iso .wire { fill: none; stroke: #45434d; stroke-width: 1.3; transition: stroke 0.3s; }
+.iso .wire.dashed { stroke-dasharray: 5 6; }
+.iso .arrow { fill: none; stroke: #6a6874; stroke-width: 1.3; }
+.iso .cube-top { fill: #f2f0f7; }
+.iso .cube-l { fill: #b9b5c6; }
+.iso .cube-r { fill: #8a8697; }
+.iso text { fill: var(--text-2); }
+.iso .h-title { font-size: 30px; font-weight: 500; letter-spacing: -0.02em; fill: var(--text); }
+.iso .h-sub, .iso .h-col, .iso .h-flow, .iso .you-line, .iso .plate-label { font-family: var(--mono); font-size: 15px; letter-spacing: 0.14em; fill: var(--text-3); }
+.iso .n-label { font-size: 22px; fill: var(--text); }
+.iso .n-sub { font-size: 16px; fill: var(--text-3); }
+.iso .you-title { font-size: 26px; fill: var(--text); }
+.iso .you-led { fill: var(--accent-hi); }
+.iso .you-row { fill: #2b2a32; }
+.iso .you-dot { fill: #4b4955; }
+.iso .you-dot.on { fill: var(--accent-hi); }
+.iso .plate-label { opacity: 0; transition: opacity 0.3s; font-size: 13px; }
+.iso .plate { transition: transform 0.6s var(--ease); }
+.iso .node { cursor: pointer; outline: none; }
+/* Pointing at a part lights it and its wires. */
+.iso .node:hover .top, .iso .node:focus-visible .top, .iso .node.on .top { stroke: var(--accent-hi); }
+.iso .node:hover .side, .iso .node:focus-visible .side, .iso .node.on .side { stroke: var(--accent-hi); }
+.iso .wire.on { stroke: var(--accent-hi); }
+/* The core opens up to show its four layers. */
+.iso .core:hover .plate, .iso .core:focus-visible .plate, .iso .core.on .plate { transform: translateY(calc(var(--i, -1) * 10px + 8px)); }
+.iso .core:hover .plate-top, .iso .core:focus-visible .plate-top, .iso .core.on .plate-top { transform: translateY(-10px); }
+.iso .core:hover .plate-label, .iso .core:focus-visible .plate-label, .iso .core.on .plate-label { opacity: 1; }
+.iso-foot { position: absolute; left: 20px; right: 20px; bottom: 16px; display: flex; justify-content: space-between; gap: 24px; font: 500 12px var(--mono); letter-spacing: 0.12em; color: var(--text-3); pointer-events: none; }
+.iso-foot #iso-hint { text-transform: uppercase; max-width: 70%; }
+.iso-foot #iso-hint.said { text-transform: none; letter-spacing: 0.02em; font-size: 13.5px; color: var(--text-2); }
+@media (prefers-reduced-motion: reduce) { .iso .packet { display: none; } }
+
+/* ---------- In the app: tabs over real screens ---------- */
+.show { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 48px; margin-top: 96px; align-items: start; }
+.show-side { position: relative; min-height: 220px; padding-top: 64px; }
+.show-copy { position: absolute; inset: 64px 0 auto 0; opacity: 0; transform: translateY(10px); transition: opacity 0.5s var(--ease), transform 0.6s var(--ease); pointer-events: none; }
+.show-copy.on { opacity: 1; transform: none; pointer-events: auto; }
+.show-copy h3 { margin: 0 0 14px; font-size: clamp(28px, 2.6vw, 38px); line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; }
+.show-copy p { margin: 0; color: var(--text-2); font-size: 16.5px; line-height: 1.55; }
+.show-tabs { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; scrollbar-width: none; }
+.show-tabs::-webkit-scrollbar { display: none; }
+.show-tabs button {
+  position: relative; flex: 1 0 auto; padding: 18px 18px 12px; border: 1px solid var(--line); border-bottom: 0; border-radius: 14px 14px 0 0; background: none;
+  font: 500 15px var(--mono); letter-spacing: 0.12em; color: var(--text-3); text-align: left; cursor: pointer; transition: color 0.25s, border-color 0.25s;
+}
+.show-tabs button:hover { color: var(--text-2); }
+.show-tabs button[aria-selected="true"] { color: var(--text); border-color: var(--line-2); }
+/* The bar on the chosen tab fills while it's shown, then the next tab takes over. */
+.show-tabs .bar { position: absolute; left: 14px; right: 14px; top: 0; height: 2px; border-radius: 2px; background: var(--line-2); overflow: hidden; opacity: 0; transition: opacity 0.25s; }
+.show-tabs button[aria-selected="true"] .bar { opacity: 1; }
+.show-tabs .bar::after { content: ""; position: absolute; inset: 0; background: var(--text); transform-origin: left; transform: scaleX(var(--p, 1)); }
+.show-frame { position: relative; overflow: hidden; aspect-ratio: 16 / 10; border: 1px solid var(--line-2); border-radius: 14px; background: var(--panel); outline: none; }
+.show-shot { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity 0.45s var(--ease); pointer-events: none; }
+.show-shot.on { opacity: 1; pointer-events: auto; }
+.show-shot picture, .show-shot img { display: block; width: 100%; height: 100%; border-radius: 13px; overflow: hidden; }
+.show-shot img { object-fit: cover; object-position: top left; }
+/* The callout: a pin on the thing that matters, and a label beside it. */
+.show-shot .pin { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 2px solid #fff; background: var(--accent); }
+.show-shot .callout {
+  position: absolute; transform: translate(28px, calc(-100% - 25px)); padding: 9px 14px; border-radius: 10px; background: var(--accent); color: #fff;
+  font: 500 15px var(--font); white-space: nowrap; box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.8);
+}
+/* The leader runs from the pin up to the bubble's near corner. */
+.show-shot .leader { position: absolute; width: 38px; height: 1.5px; background: var(--accent); transform-origin: 0 50%; transform: rotate(-40deg); }
+.show-shot[data-tab="policies"] .callout, .show-shot[data-tab="sandboxes"] .callout { transform: translate(calc(-100% - 28px), calc(-100% - 25px)); }
+.show-shot[data-tab="policies"] .leader, .show-shot[data-tab="sandboxes"] .leader { transform: rotate(-140deg); }
+@media (prefers-reduced-motion: no-preference) {
+  .show-shot.on .pin { animation: pin-in 0.6s var(--ease) 0.25s both; }
+  .show-shot.on .callout, .show-shot.on .leader { animation: callout-in 0.6s var(--ease) 0.35s both; }
+}
+@keyframes pin-in { from { transform: scale(0.4); opacity: 0; } }
+@keyframes callout-in { from { opacity: 0; margin-top: 8px; } }
+@media (max-width: 1080px) {
+  .show { grid-template-columns: minmax(0, 1fr); gap: 20px; margin-top: 64px; }
+  .show-side { min-height: 150px; padding-top: 0; }
+  .show-copy { inset: 0 0 auto 0; }
+}
+@media (max-width: 640px) {
+  .show-tabs button { padding: 12px 12px 9px; font-size: 12px; }
+  .show-shot .callout { font-size: 12px; padding: 6px 10px; white-space: normal; width: max-content; max-width: 46vw; }
+  .iso-foot { font-size: 10px; }
+  .iso-foot #iso-hint.said { font-size: 12px; }
+}
+
 @media (max-width: 1080px) {
   .hero { grid-template-columns: 1fr; gap: 32px; min-height: 0; padding-top: 64px !important; }
   .kalypso { font-size: clamp(6px, 1.5vw, 10px); justify-self: center; }
-  .flow { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
-  .diagram { font-size: 9px; }
   .kalypso { font-size: 1.3vw; }
 }

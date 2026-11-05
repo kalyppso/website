@@ -231,123 +231,90 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
   }
 })();
 
-/* ---------- How a call travels: the ASCII diagram ---------- */
+/* ---------- The stack, isometric: hover a part ---------- */
 
-(function flow() {
-  const pre = $("#diagram");
-  if (!pre) return;
-  const LAYERS = [
-    { id: "agent", name: "AGENT", note: "supervised, restarted, capped", title: "Agent", text: "Claude, supervised in its sandbox: restarted when it crashes, stopped at its turn limit." },
-    { id: "policies", name: "POLICIES", note: "every call checked first", title: "Policies", text: "Every tool call is checked before it runs. Risky ones wait for you, and no answer means no." },
-    { id: "sandbox", name: "SANDBOX", note: "read-only, no privileges", title: "Sandbox", text: "A read-only container with no privileges and its own network, or none at all." },
-    { id: "vault", name: "VAULT", note: "secrets lent, never handed", title: "Vault", text: "Secrets arrive as files, or are lent to one approved command the agent can't read." },
-    { id: "gateway", name: "GATEWAY", note: "stand-in key in, real out", title: "Gateway", text: "Agents hold a stand-in key; the real one is swapped in here. Every token metered and capped." },
-  ];
-  const EXTRA = {
-    you: { title: "You", text: "Approve, pause or revoke anything, from the app or a notification. Every decision is written down." },
-    models: { title: "Models", text: "Claude, any OpenAI-compatible API, or a model on your own machine. Your keys never leave KALYPSO." },
+(function iso() {
+  const svg = $("#iso");
+  if (!svg) return;
+  const hint = $("#iso-hint");
+  const SAY = {
+    claude: "Claude Code runs in a sandbox, with only a KALYPSO key.",
+    sdk: "Agents built on the Claude Agent SDK, supervised and restarted if they crash.",
+    scripts: "Any program you start in a sandbox gets the same guard rails.",
+    core: "Four layers: every call is checked by policy, contained by the sandbox, given secrets by the vault and metered by the gateway.",
+    anthropic: "The real Anthropic key is added here, never inside a sandbox.",
+    compat: "OpenAI-compatible APIs work too: OpenRouter, vLLM and others.",
+    ollama: "Or a model on your own machine, through the same gateway.",
+    you: "Risky calls wait for your answer. No answer means no.",
   };
-  // Everything is laid out on one grid: the flow runs straight down column 23.
-  const CW = 43; // box width between its borders
-  const span = (cls, t, attrs = "") => `<span class="${cls}"${attrs}>${t}</span>`;
-  const part = (id, t) => span(`part p-${id}`, t, ` data-part="${id}" tabindex="0" role="button" aria-label="${(LAYERS.find((l) => l.id === id) || EXTRA[id] || { title: id }).title}"`);
-  const pad = (t, n) => t + " ".repeat(Math.max(0, n - t.length));
+  const show = (node) => {
+    $$(".node.on, .wire.on", svg).forEach((el) => el.classList.remove("on"));
+    if (!node) { hint.textContent = "Hover a part"; hint.classList.remove("said"); return; }
+    const id = node.dataset.part;
+    node.classList.add("on");
+    // Light the wires that touch this part (the core touches them all).
+    $$(".wire", svg).forEach((w) => { if (id === "core" || w.dataset.to === id) w.classList.add("on"); });
+    hint.textContent = SAY[id] || "";
+    hint.classList.add("said");
+  };
+  svg.addEventListener("mouseover", (e) => show(e.target.closest(".node")));
+  svg.addEventListener("mouseleave", () => show(null));
+  svg.addEventListener("focusin", (e) => show(e.target.closest(".node")));
+  svg.addEventListener("focusout", () => show(null));
+  svg.addEventListener("click", (e) => show(e.target.closest(".node"))); // touch
+  // The packets only move while the diagram is on screen, and never with reduced motion.
+  if (reduce) { svg.pauseAnimations(); return; }
+  new IntersectionObserver(([e]) => (e.isIntersecting ? svg.unpauseAnimations() : svg.pauseAnimations())).observe(svg);
+})();
 
-  const lines = [];
-  lines.push("   " + span("dim", "claude code") + "     " + span("dim", "agent sdk") + "     " + span("dim", "your script"));
-  lines.push("        " + span("wire w-in", "|") + " ".repeat(14) + span("wire w-in", "|") + " ".repeat(14) + span("wire w-in", "|"));
-  lines.push("        " + span("wire w-in", "+" + "-".repeat(14) + "+" + "-".repeat(14) + "+"));
-  lines.push("                       " + span("wire w-in", "v") + span("dim", "  tool call"));
-  lines.push(" +" + "-".repeat(CW) + "+");
-  LAYERS.forEach((l, i) => {
-    // " · NAME      note…  " fills exactly CW columns.
-    const row = ` ${span("mark", "·", ` data-mark="${l.id}"`)} ${pad(l.name, 10)}${span("dnote", pad(l.note, CW - 14))} `;
-    let tail = "";
-    if (l.id === "policies") tail = span("wire w-you", " ····>") + part("you", "|  YOU  |");
-    lines.push(" |" + part(l.id, row) + "|" + tail);
-    if (i < LAYERS.length - 1) {
-      let side = "";
-      if (l.id === "agent") side = "      " + span("you-box", "+-------+");
-      if (l.id === "policies") side = "      " + span("you-box", "+-------+");
-      lines.push(" +" + "-".repeat(CW) + "+" + side);
-    }
+/* ---------- In the app: tabs over real screens ---------- */
+
+(function showcase() {
+  const tabs = $$(".show-tabs [role=tab]");
+  if (!tabs.length) return;
+  const panel = $("#show-panel");
+  const SHOW_MS = 7000;
+  let current = 0, started = 0, raf = null, paused = false, visible = false, auto = !reduce;
+  const select = (i, focus = false) => {
+    current = (i + tabs.length) % tabs.length;
+    const key = tabs[current].dataset.tab;
+    tabs.forEach((t, n) => {
+      const on = n === current;
+      t.setAttribute("aria-selected", String(on));
+      t.tabIndex = on ? 0 : -1;
+      t.querySelector(".bar").style.setProperty("--p", on && auto ? 0 : 1);
+    });
+    $$(".show-shot, .show-copy").forEach((el) => el.classList.toggle("on", el.dataset.tab === key));
+    panel.setAttribute("aria-labelledby", tabs[current].id);
+    if (focus) tabs[current].focus();
+    tabs[current].scrollIntoView({ block: "nearest", inline: "nearest" });
+    started = performance.now();
+  };
+  // Each tab's bar fills while it's shown; then the next one takes over. Choosing a tab stops it.
+  const tick = (now) => {
+    raf = null;
+    if (!auto || !visible) return;
+    if (paused) started = now - (Number(tabs[current].querySelector(".bar").style.getPropertyValue("--p")) || 0) * SHOW_MS;
+    const p = Math.min(1, (now - started) / SHOW_MS);
+    tabs[current].querySelector(".bar").style.setProperty("--p", p);
+    if (p >= 1) select(current + 1);
+    raf = requestAnimationFrame(tick);
+  };
+  const stopAuto = () => { auto = false; tabs.forEach((t) => t.querySelector(".bar").style.setProperty("--p", 1)); };
+  tabs.forEach((t, i) => t.addEventListener("click", () => { stopAuto(); select(i); }));
+  $(".show-tabs").addEventListener("keydown", (e) => {
+    const go = { ArrowRight: current + 1, ArrowLeft: current - 1, Home: 0, End: tabs.length - 1 }[e.key];
+    if (go === undefined) return;
+    e.preventDefault();
+    stopAuto();
+    select(go, true);
   });
-  const left = Math.floor(CW / 2);
-  lines.push(" +" + "-".repeat(left) + "+" + "-".repeat(CW - left - 1) + "+");
-  const mid = 2 + left; // column 23, under the tool call arrow
-  lines.push(" ".repeat(mid) + span("wire w-out", "|") + span("dim", "  metered · capped"));
-  lines.push(" ".repeat(mid - 14) + span("wire w-out", "+" + "-".repeat(13) + "+" + "-".repeat(13) + "+"));
-  lines.push(" ".repeat(mid - 14) + span("wire w-out", "v") + " ".repeat(13) + span("wire w-out", "v") + " ".repeat(13) + span("wire w-out", "v"));
-  // Each name centred under its arrow (columns mid-14, mid and mid+14).
-  lines.push(" ".repeat(mid - 19) + part("models", span("model m-anthropic", " anthropic ") + "   " + span("model m-openai", "  openai  ") + "    " + span("model m-ollama", "  ollama  ")));
-  pre.innerHTML = lines.join("\n");
-  // Always show the whole diagram: on narrow screens the type shrinks to fit, never scrolls.
-  const fit = () => {
-    pre.style.fontSize = "";
-    const base = parseFloat(getComputedStyle(pre).fontSize);
-    let size = base;
-    for (let i = 0; i < 6 && pre.scrollWidth > pre.clientWidth && size > 5; i++) {
-      size = Math.max(5, (size * pre.clientWidth) / pre.scrollWidth - 0.15);
-      pre.style.fontSize = `${size}px`;
-    }
-  };
-  fit();
-  addEventListener("resize", fit);
-
-  // ----- Pointing at a part shows it in the app -----
-  const card = { title: $("#flow-title"), text: $("#flow-text"), pics: $$(".flow .lx-screen picture") };
-  const showPart = (id) => {
-    const l = LAYERS.find((x) => x.id === id) || EXTRA[id];
-    if (!l) return;
-    card.title.textContent = l.title;
-    card.text.textContent = l.text;
-    card.pics.forEach((p) => p.classList.toggle("on", p.dataset.l === id));
-    $$(".part", pre).forEach((p) => p.classList.toggle("picked", p.dataset.part === id));
-  };
-  let pinnedUntil = 0; // after you point at a part, the animation leaves the card alone for a while
-  const point = (e) => { const p = e.target.closest(".part"); if (p) { pinnedUntil = Date.now() + 8000; showPart(p.dataset.part); } };
-  pre.addEventListener("mouseover", point);
-  pre.addEventListener("focusin", point);
-  pre.addEventListener("click", point);
-  const follow = (id) => { if (Date.now() > pinnedUntil) showPart(id); };
-  showPart("agent");
-
-  // ----- Two scenes, looping: a normal call, and one KALYPSO stops -----
-  const status = $("#flow-status");
-  const lit = (sel, on = true) => $$(sel, pre).forEach((el) => el.classList.toggle("lit", on));
-  const clear = () => { $$(".lit, .stop", pre).forEach((el) => el.classList.remove("lit", "stop")); $$("[data-mark]", pre).forEach((m) => (m.textContent = "·")); };
-  const at = (id, cls = "lit") => { const m = $(`[data-mark="${id}"]`, pre); if (m) m.textContent = "*"; $(`.p-${id}`, pre)?.classList.add(cls); follow(id); };
-  const SCENES = [
-    [
-      [() => { clear(); lit(".w-in"); status.textContent = "claude code → bash: npm test"; }, 900],
-      [() => at("agent"), 600],
-      [() => { at("policies"); status.textContent = "policies: allowed"; }, 800],
-      [() => at("sandbox"), 600],
-      [() => at("vault"), 600],
-      [() => { at("gateway"); status.textContent = "gateway: kx_ key → real key"; }, 800],
-      [() => { lit(".w-out"); $(".m-anthropic", pre).classList.add("lit"); follow("models"); status.textContent = "anthropic: 200 · $0.004 metered"; }, 2200],
-    ],
-    [
-      [() => { clear(); lit(".w-in"); status.textContent = "agent sdk → bash: git push --force main"; }, 900],
-      [() => at("agent"), 600],
-      [() => { at("policies", "stop"); status.textContent = "policies: blocked, no force-push to main"; }, 1100],
-      [() => { lit(".w-you"); $(".p-you", pre).classList.add("lit"); lit(".you-box"); follow("you"); status.textContent = "you: notified · it never ran"; }, 2600],
-    ],
-  ];
-  if (reduce) { SCENES[1].forEach(([fn]) => fn()); return; }
-  let scene = 0, step = 0, timer = null, visible = false;
-  const tick = () => {
-    timer = null;
-    if (!visible) return;
-    const s = SCENES[scene];
-    const [fn, wait] = s[step];
-    fn();
-    step++;
-    if (step >= s.length) { step = 0; scene = (scene + 1) % SCENES.length; }
-    timer = setTimeout(tick, wait);
-  };
+  const show = $(".show");
+  show.addEventListener("mouseenter", () => (paused = true));
+  show.addEventListener("mouseleave", () => (paused = false));
   new IntersectionObserver(([e]) => {
     visible = e.isIntersecting;
-    if (visible && !timer) timer = setTimeout(tick, 300);
-  }, { threshold: 0.3 }).observe(pre);
+    if (visible && auto && !raf) { started = performance.now(); raf = requestAnimationFrame(tick); }
+  }, { threshold: 0.35 }).observe(show);
+  select(0);
 })();
