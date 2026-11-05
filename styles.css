@@ -72,24 +72,25 @@ main > section + section { border-top: 1px solid var(--line); }
 [data-stars][hidden] { display: none; }
 
 /* ---------- Hero ---------- */
-.hero { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 96px !important; padding-bottom: 72px !important; }
-.mark { width: 168px; height: auto; margin-bottom: 30px; }
-h1 { font-size: clamp(48px, 8.4vw, 112px); line-height: 0.98; letter-spacing: -0.055em; font-weight: 640; margin: 0 0 28px; padding-bottom: 8px; position: relative; z-index: 1; }
-h1 em { font-style: italic; color: var(--accent-hi); padding-right: 0.06em; }
-.lede { font-size: 19px; line-height: 1.55; color: var(--text-2); max-width: 30em; margin: 0 0 36px; position: relative; z-index: 1; }
-.cta { position: relative; z-index: 1; }
-.gh-line { position: relative; z-index: 1; margin-top: 22px; display: inline-flex; align-items: center; gap: 8px; color: var(--text-3); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+.hero { display: grid !important; grid-template-columns: minmax(0, 1.1fr) auto; gap: 48px; align-items: center; padding-top: 96px !important; padding-bottom: 88px !important; min-height: min(86dvh, 780px); }
+.hero-copy { min-width: 0; }
+h1 span { white-space: nowrap; }
+h1 { font-size: clamp(34px, 3.7vw, 54px); line-height: 1.08; letter-spacing: -0.05em; font-weight: 640; margin: 0 0 24px; padding-bottom: 6px; }
+h1 em { font-style: italic; color: var(--accent-hi); padding-right: 0.05em; }
+.lede { font-size: 19px; line-height: 1.55; color: var(--text-2); max-width: 27em; margin: 0 0 34px; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; }
+.gh-line { margin-top: 20px; display: inline-flex; align-items: center; gap: 8px; color: var(--text-3); text-decoration: none; font-size: 14px; transition: color 0.2s; }
 .gh-line:hover { color: var(--text); }
 .gh-line .i:last-child { width: 13px; height: 13px; }
+/* Kalypso, drawn in characters from the logo. */
+.kalypso { margin: 0; font: 500 clamp(6px, 0.66vw, 9.5px) / 1.18 var(--mono); letter-spacing: 0.02em; color: var(--accent-hi); white-space: pre; user-select: none; }
 
 /* Tide lines: our own sea, drawn as thin contours either side of the headline. */
 @media (prefers-reduced-motion: no-preference) {
-  .hero > * { animation: rise 1s var(--ease) both; }
-  .hero > .mark { animation: mark-in 1.1s var(--ease) both; }
-  .hero > h1 { animation-delay: 0.05s; }
-  .hero > .lede { animation-delay: 0.12s; }
-  .hero > .cta { animation-delay: 0.18s; }
-  .hero > .gh-line { animation-delay: 0.24s; }
+  .hero-copy > * { animation: rise 1s var(--ease) both; }
+  .hero-copy > :nth-child(2) { animation-delay: 0.08s; }
+  .hero-copy > :nth-child(3) { animation-delay: 0.16s; }
+  .hero-copy > :nth-child(4) { animation-delay: 0.22s; }
   .stage { animation: rise 1.2s var(--ease) 0.3s both; }
 }
 @keyframes mark-in { from { opacity: 0; transform: translateY(10px) scale(0.96); } }
@@ -229,7 +230,7 @@ h2 { font-size: clamp(30px, 3.6vw, 44px); line-height: 1.08; letter-spacing: -0.
   main > .stage { padding: 0 12px 56px !important; }
   .nav-link.gh span:not(.stars) { display: none; }
   .nav-link[href="#layers"] { display: none; }
-  h1 { font-size: 44px; }
+  h1 { font-size: 32px; }
   .lede { font-size: 17px; }
   .rows li { grid-template-columns: 1fr auto; }
   .rows li span { display: none; }
@@ -238,38 +239,39 @@ h2 { font-size: clamp(30px, 3.6vw, 44px); line-height: 1.08; letter-spacing: -0.
   .get, .faq { padding-top: 64px !important; padding-bottom: 72px !important; }
 }
 
-/* ---------- Layers: pick one, see its real screen ---------- */
+/* ---------- Layers: how a call travels, in ASCII ---------- */
 main > .layers { padding-top: 96px; padding-bottom: 104px; }
 .layers .sub { margin: 0 0 40px; }
-.lx { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 28px; align-items: start; }
-.lx-list { display: flex; flex-direction: column; gap: 2px; }
-.lx-list button {
-  position: relative; display: grid; gap: 2px; width: 100%; padding: 12px 14px 12px 18px; border: 0; border-radius: 10px; background: none;
-  color: var(--text-2); font: inherit; text-align: left; cursor: pointer; transition: background 0.2s var(--ease), color 0.2s var(--ease);
-}
-.lx-list button b { font-size: 15.5px; font-weight: 600; color: var(--text-2); transition: color 0.2s; }
-.lx-list button span { font-size: 13.5px; color: var(--text-3); line-height: 1.45; }
-.lx-list button::before { content: ""; position: absolute; left: 6px; top: 14px; bottom: 14px; width: 2px; border-radius: 2px; background: transparent; transition: background 0.2s; }
-.lx-list button:hover { background: var(--panel); }
-.lx-list button:hover b { color: var(--text); }
-.lx-list button[aria-selected="true"] { background: var(--panel-2); }
-.lx-list button[aria-selected="true"] b { color: var(--text); }
-.lx-list button[aria-selected="true"] span { color: var(--text-2); }
-.lx-list button[aria-selected="true"]::before { background: var(--accent-hi); }
-.lx-panel { outline: none; }
-.lx-screen { position: relative; aspect-ratio: 16 / 10; border: 1px solid var(--line-2); border-radius: 14px; overflow: hidden; background: var(--panel); box-shadow: 0 40px 100px -50px #000; }
-.lx-screen picture { position: absolute; inset: 0; opacity: 0; transform: scale(1.012); transition: opacity 0.45s var(--ease), transform 0.6s var(--ease); }
-.lx-screen picture.on { opacity: 1; transform: none; }
+.flow { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 40px; align-items: start; }
+.diagram { margin: 0; font: 500 13px / 1.5 var(--mono); color: var(--text-3); white-space: pre; overflow-x: auto; }
+.diagram .dim { color: var(--text-3); }
+.diagram .wire { color: var(--line-3); transition: color 0.3s var(--ease); }
+.diagram .wire.lit { color: var(--accent-hi); }
+.diagram .you-box { color: var(--line-3); transition: color 0.3s var(--ease); }
+.diagram .you-box.lit { color: var(--accent-hi); }
+.diagram .part { color: var(--text-2); cursor: pointer; border-radius: 3px; outline: none; transition: color 0.25s, background 0.25s; }
+.diagram .part .dnote { color: var(--text-3); transition: color 0.25s; }
+.diagram .part:hover, .diagram .part:focus-visible, .diagram .part.picked { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--text); }
+.diagram .part:focus-visible { box-shadow: 0 0 0 1px var(--accent-hi); }
+.diagram .part.lit, .diagram .part.lit .dnote { color: var(--text); }
+.diagram .part.lit .mark, .diagram .part.stop .mark { color: var(--accent-hi); }
+.diagram .part.stop { color: var(--text); background: color-mix(in srgb, var(--accent) 30%, transparent); }
+.diagram .model { transition: color 0.3s, background 0.3s; border-radius: 3px; }
+.diagram .model.lit { color: var(--bg); background: var(--accent-hi); }
+.flow-side { display: grid; gap: 14px; min-width: 0; }
+.flow-status { margin: 0; min-height: 1.5em; font-size: 13px; color: var(--accent-ink); }
+.flow-card h3 { margin: 0 0 6px; font-size: 20px; letter-spacing: -0.02em; }
+.flow-card p { margin: 0 0 18px; color: var(--text-2); font-size: 15px; max-width: 34em; }
+.lx-screen { position: relative; aspect-ratio: 16 / 10; border: 1px solid var(--line-2); border-radius: 12px; overflow: hidden; background: var(--panel); }
+.lx-screen picture { position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s var(--ease); }
+.lx-screen picture.on { opacity: 1; }
 .lx-screen img { width: 100%; height: 100%; object-fit: cover; object-position: top left; }
-@media (max-width: 860px) {
-  .lx { grid-template-columns: 1fr; gap: 16px; }
-  /* Tabs across the top, scrolling sideways if they don't fit. */
-  .lx-list { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; scrollbar-width: none; }
-  .lx-list::-webkit-scrollbar { display: none; }
-  .lx-list button { width: auto; flex: none; padding: 8px 14px; border: 1px solid var(--line-2); border-radius: 999px; }
-  .lx-list button span, .lx-list button::before { display: none; }
-  .lx-list button b { font-size: 14px; }
-  .lx-list button[aria-selected="true"] { background: var(--text); border-color: var(--text); }
-  .lx-list button[aria-selected="true"] b { color: var(--bg); }
-  .mark { width: 128px; }
+@media (max-width: 1080px) {
+  .hero { grid-template-columns: 1fr; gap: 32px; min-height: 0; padding-top: 64px !important; }
+  .kalypso { font-size: clamp(6px, 1.5vw, 10px); justify-self: center; }
+  .flow { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .diagram { font-size: 9px; }
+  .kalypso { font-size: 1.3vw; }
 }

@@ -162,44 +162,6 @@ const io = new IntersectionObserver(
 );
 $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observe(el); });
 
-/* ---------- Layers ---------- */
-
-// A tab list: click, or use the arrow keys, Home and End. The panel shows the real
-// KALYPSO screen for the chosen layer, cross-fading between them.
-(function layers() {
-  const tabs = $$('.lx-list [role="tab"]');
-  const panel = $("#lx-panel");
-  if (!tabs.length || !panel) return;
-  const pics = $$(".lx-screen picture");
-  const select = (tab, focus = false) => {
-    tabs.forEach((t) => {
-      const on = t === tab;
-      t.setAttribute("aria-selected", String(on));
-      t.tabIndex = on ? 0 : -1;
-    });
-    pics.forEach((p) => p.classList.toggle("on", p.dataset.l === tab.dataset.l));
-    panel.setAttribute("aria-labelledby", tab.id);
-    if (focus) tab.focus();
-    // On phones the tabs scroll sideways: keep the chosen one in view.
-    tab.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reduce ? "auto" : "smooth" });
-  };
-  tabs.forEach((t) => t.addEventListener("click", () => select(t)));
-  $(".lx-list").addEventListener("keydown", (e) => {
-    const i = tabs.indexOf(document.activeElement);
-    if (i < 0) return;
-    const go = { ArrowDown: i + 1, ArrowRight: i + 1, ArrowUp: i - 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
-    if (go === undefined) return;
-    e.preventDefault();
-    select(tabs[(go + tabs.length) % tabs.length], true);
-  });
-  // Load every screen once the section is near, so switching never waits on the network.
-  new IntersectionObserver(([e], obs) => {
-    if (!e.isIntersecting) return;
-    $$(".lx-screen img").forEach((img) => (img.loading = "eager"));
-    obs.disconnect();
-  }, { rootMargin: "400px 0px" }).observe(panel);
-})();
-
 /* ---------- The section you're in ---------- */
 
 (function navActive() {
@@ -217,4 +179,175 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
     { rootMargin: "-40% 0px -55% 0px" },
   );
   targets.forEach((t) => watch.observe(t));
+})();
+
+/* ---------- Kalypso, in ASCII ---------- */
+
+// She decodes into place on load, then a slow tide moves through the waves below her.
+(function kalypso() {
+  const pre = $("#kalypso");
+  if (!pre) return;
+  const art = pre.textContent;
+  const RAMP = " .,:;=+*#";
+  const lines = art.split("\n");
+  const tideFrom = Math.floor(lines.length * 0.68); // the waves: the bottom third
+  if (reduce) return;
+
+  // 1. Decode: each character settles at its own moment within the first 1.3 s.
+  const settle = [...art].map((c) => (c === " " || c === "\n" ? 0 : 200 + Math.random() * 1100));
+  const t0 = performance.now();
+  const decode = (now) => {
+    const t = now - t0;
+    let done = true;
+    pre.textContent = [...art].map((c, i) => {
+      if (t >= settle[i]) return c;
+      done = false;
+      return RAMP[1 + Math.floor(Math.random() * (RAMP.length - 1))];
+    }).join("");
+    if (done) startTide(); else requestAnimationFrame(decode);
+  };
+  requestAnimationFrame(decode);
+
+  // 2. Tide: a slow swell of brightness rolling through the waves, only while she's on screen.
+  let visible = true, timer = null, phase = 0;
+  function frame() {
+    phase += 0.35;
+    pre.textContent = lines.map((line, y) => {
+      if (y < tideFrom) return line;
+      return [...line].map((c, x) => {
+        const i = RAMP.indexOf(c);
+        if (i <= 0) return c;
+        const swell = Math.round(Math.sin(x * 0.18 - phase + y * 0.6) * 1.2);
+        return RAMP[Math.max(1, Math.min(RAMP.length - 1, i + swell))];
+      }).join("");
+    }).join("\n");
+  }
+  function startTide() {
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      clearInterval(timer);
+      if (visible) timer = setInterval(frame, 140);
+    }).observe(pre);
+  }
+})();
+
+/* ---------- How a call travels: the ASCII diagram ---------- */
+
+(function flow() {
+  const pre = $("#diagram");
+  if (!pre) return;
+  const LAYERS = [
+    { id: "agent", name: "AGENT", note: "supervised, restarted, capped", title: "Agent", text: "Claude, supervised in its sandbox: restarted when it crashes, stopped at its turn limit." },
+    { id: "policies", name: "POLICIES", note: "every call checked first", title: "Policies", text: "Every tool call is checked before it runs. Risky ones wait for you, and no answer means no." },
+    { id: "sandbox", name: "SANDBOX", note: "read-only, no privileges", title: "Sandbox", text: "A read-only container with no privileges and its own network, or none at all." },
+    { id: "vault", name: "VAULT", note: "secrets lent, never handed", title: "Vault", text: "Secrets arrive as files, or are lent to one approved command the agent can't read." },
+    { id: "gateway", name: "GATEWAY", note: "stand-in key in, real out", title: "Gateway", text: "Agents hold a stand-in key; the real one is swapped in here. Every token metered and capped." },
+  ];
+  const EXTRA = {
+    you: { title: "You", text: "Approve, pause or revoke anything, from the app or a notification. Every decision is written down." },
+    models: { title: "Models", text: "Claude, any OpenAI-compatible API, or a model on your own machine. Your keys never leave KALYPSO." },
+  };
+  // Everything is laid out on one grid: the flow runs straight down column 23.
+  const CW = 43; // box width between its borders
+  const span = (cls, t, attrs = "") => `<span class="${cls}"${attrs}>${t}</span>`;
+  const part = (id, t) => span(`part p-${id}`, t, ` data-part="${id}" tabindex="0" role="button" aria-label="${(LAYERS.find((l) => l.id === id) || EXTRA[id] || { title: id }).title}"`);
+  const pad = (t, n) => t + " ".repeat(Math.max(0, n - t.length));
+
+  const lines = [];
+  lines.push("   " + span("dim", "claude code") + "     " + span("dim", "agent sdk") + "     " + span("dim", "your script"));
+  lines.push("        " + span("wire w-in", "|") + " ".repeat(14) + span("wire w-in", "|") + " ".repeat(14) + span("wire w-in", "|"));
+  lines.push("        " + span("wire w-in", "+" + "-".repeat(14) + "+" + "-".repeat(14) + "+"));
+  lines.push("                       " + span("wire w-in", "v") + span("dim", "  tool call"));
+  lines.push(" +" + "-".repeat(CW) + "+");
+  LAYERS.forEach((l, i) => {
+    // " · NAME      note…  " fills exactly CW columns.
+    const row = ` ${span("mark", "·", ` data-mark="${l.id}"`)} ${pad(l.name, 10)}${span("dnote", pad(l.note, CW - 14))} `;
+    let tail = "";
+    if (l.id === "policies") tail = span("wire w-you", " ····>") + part("you", "|  YOU  |");
+    lines.push(" |" + part(l.id, row) + "|" + tail);
+    if (i < LAYERS.length - 1) {
+      let side = "";
+      if (l.id === "agent") side = "      " + span("you-box", "+-------+");
+      if (l.id === "policies") side = "      " + span("you-box", "+-------+");
+      lines.push(" +" + "-".repeat(CW) + "+" + side);
+    }
+  });
+  const left = Math.floor(CW / 2);
+  lines.push(" +" + "-".repeat(left) + "+" + "-".repeat(CW - left - 1) + "+");
+  const mid = 2 + left; // column 23, under the tool call arrow
+  lines.push(" ".repeat(mid) + span("wire w-out", "|") + span("dim", "  metered · capped"));
+  lines.push(" ".repeat(mid - 14) + span("wire w-out", "+" + "-".repeat(13) + "+" + "-".repeat(13) + "+"));
+  lines.push(" ".repeat(mid - 14) + span("wire w-out", "v") + " ".repeat(13) + span("wire w-out", "v") + " ".repeat(13) + span("wire w-out", "v"));
+  // Each name centred under its arrow (columns mid-14, mid and mid+14).
+  lines.push(" ".repeat(mid - 19) + part("models", span("model m-anthropic", " anthropic ") + "   " + span("model m-openai", "  openai  ") + "    " + span("model m-ollama", "  ollama  ")));
+  pre.innerHTML = lines.join("\n");
+  // Always show the whole diagram: on narrow screens the type shrinks to fit, never scrolls.
+  const fit = () => {
+    pre.style.fontSize = "";
+    const base = parseFloat(getComputedStyle(pre).fontSize);
+    let size = base;
+    for (let i = 0; i < 6 && pre.scrollWidth > pre.clientWidth && size > 5; i++) {
+      size = Math.max(5, (size * pre.clientWidth) / pre.scrollWidth - 0.15);
+      pre.style.fontSize = `${size}px`;
+    }
+  };
+  fit();
+  addEventListener("resize", fit);
+
+  // ----- Pointing at a part shows it in the app -----
+  const card = { title: $("#flow-title"), text: $("#flow-text"), pics: $$(".flow .lx-screen picture") };
+  const showPart = (id) => {
+    const l = LAYERS.find((x) => x.id === id) || EXTRA[id];
+    if (!l) return;
+    card.title.textContent = l.title;
+    card.text.textContent = l.text;
+    card.pics.forEach((p) => p.classList.toggle("on", p.dataset.l === id));
+    $$(".part", pre).forEach((p) => p.classList.toggle("picked", p.dataset.part === id));
+  };
+  let pinnedUntil = 0; // after you point at a part, the animation leaves the card alone for a while
+  const point = (e) => { const p = e.target.closest(".part"); if (p) { pinnedUntil = Date.now() + 8000; showPart(p.dataset.part); } };
+  pre.addEventListener("mouseover", point);
+  pre.addEventListener("focusin", point);
+  pre.addEventListener("click", point);
+  const follow = (id) => { if (Date.now() > pinnedUntil) showPart(id); };
+  showPart("agent");
+
+  // ----- Two scenes, looping: a normal call, and one KALYPSO stops -----
+  const status = $("#flow-status");
+  const lit = (sel, on = true) => $$(sel, pre).forEach((el) => el.classList.toggle("lit", on));
+  const clear = () => { $$(".lit, .stop", pre).forEach((el) => el.classList.remove("lit", "stop")); $$("[data-mark]", pre).forEach((m) => (m.textContent = "·")); };
+  const at = (id, cls = "lit") => { const m = $(`[data-mark="${id}"]`, pre); if (m) m.textContent = "*"; $(`.p-${id}`, pre)?.classList.add(cls); follow(id); };
+  const SCENES = [
+    [
+      [() => { clear(); lit(".w-in"); status.textContent = "claude code → bash: npm test"; }, 900],
+      [() => at("agent"), 600],
+      [() => { at("policies"); status.textContent = "policies: allowed"; }, 800],
+      [() => at("sandbox"), 600],
+      [() => at("vault"), 600],
+      [() => { at("gateway"); status.textContent = "gateway: kx_ key → real key"; }, 800],
+      [() => { lit(".w-out"); $(".m-anthropic", pre).classList.add("lit"); follow("models"); status.textContent = "anthropic: 200 · $0.004 metered"; }, 2200],
+    ],
+    [
+      [() => { clear(); lit(".w-in"); status.textContent = "agent sdk → bash: git push --force main"; }, 900],
+      [() => at("agent"), 600],
+      [() => { at("policies", "stop"); status.textContent = "policies: blocked, no force-push to main"; }, 1100],
+      [() => { lit(".w-you"); $(".p-you", pre).classList.add("lit"); lit(".you-box"); follow("you"); status.textContent = "you: notified · it never ran"; }, 2600],
+    ],
+  ];
+  if (reduce) { SCENES[1].forEach(([fn]) => fn()); return; }
+  let scene = 0, step = 0, timer = null, visible = false;
+  const tick = () => {
+    timer = null;
+    if (!visible) return;
+    const s = SCENES[scene];
+    const [fn, wait] = s[step];
+    fn();
+    step++;
+    if (step >= s.length) { step = 0; scene = (scene + 1) % SCENES.length; }
+    timer = setTimeout(tick, wait);
+  };
+  new IntersectionObserver(([e]) => {
+    visible = e.isIntersecting;
+    if (visible && !timer) timer = setTimeout(tick, 300);
+  }, { threshold: 0.3 }).observe(pre);
 })();
