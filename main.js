@@ -187,23 +187,54 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
   const box = $(".isle");
   if (!box) return;
   const map = $("#isle", box);
-  const rows = $$(".xr-steps li", box);
-  // Point at a ring or a row: that layer lights up on both sides.
+  const note = $("#isle-note", box);
+  const SAY = {
+    sandbox: "Sandbox: the agent runs in its own box and only reaches hosts you allowed.",
+    policies: "Policies: every tool call is checked against your rules. Risky ones wait for you.",
+    vault: "Vault: the stand-in key is swapped for the real one here, never inside the sandbox.",
+    gateway: "Gateway: every model call is metered and stops at the budget you set.",
+  };
+  const IDLE = note.textContent;
+  // Point at a ring: it lights up and the note says what that layer does.
   const pick = (key) => {
     if (key) box.dataset.on = key; else delete box.dataset.on;
-    rows.forEach((r) => r.classList.toggle("on", r.dataset.layer === key));
+    note.textContent = key ? SAY[key] : IDLE;
+    note.classList.toggle("on", !!key);
   };
   const layerOf = (e) => e.target.closest("[data-layer]")?.dataset.layer || null;
-  for (const el of [map, $(".xr-steps", box)]) {
-    el.addEventListener("mouseover", (e) => pick(layerOf(e)));
-    el.addEventListener("mouseleave", () => pick(null));
-    el.addEventListener("focusin", (e) => pick(layerOf(e)));
-    el.addEventListener("focusout", () => pick(null));
-    el.addEventListener("click", (e) => pick(layerOf(e))); // touch
-  }
+  map.addEventListener("mouseover", (e) => pick(layerOf(e)));
+  map.addEventListener("mouseleave", () => pick(null));
+  map.addEventListener("focusin", (e) => pick(layerOf(e)));
+  map.addEventListener("focusout", () => pick(null));
+  map.addEventListener("click", (e) => pick(layerOf(e))); // touch
   // The calls only move while the map is on screen, and never with reduced motion.
   if (reduce) { map.pauseAnimations(); return; }
   new IntersectionObserver(([e]) => (e.isIntersecting ? map.unpauseAnimations() : map.pauseAnimations())).observe(map);
+})();
+
+/* ---------- Kalypso turns to follow the cursor ---------- */
+
+(function portrait() {
+  const fig = $(".portrait");
+  if (!fig || reduce || !matchMedia("(pointer: fine)").matches) return;
+  let tx = 0, ty = 0, x = 0, y = 0, raf = null;
+  const clamp = (v) => Math.max(-1, Math.min(1, v));
+  const step = () => {
+    // Ease toward the cursor, so she turns rather than snaps.
+    x += (tx - x) * 0.07;
+    y += (ty - y) * 0.07;
+    fig.style.setProperty("--x", x.toFixed(4));
+    fig.style.setProperty("--y", y.toFixed(4));
+    raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.002 ? requestAnimationFrame(step) : null;
+  };
+  addEventListener("pointermove", (e) => {
+    const r = fig.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return; // only while she's on screen
+    tx = clamp((e.clientX - (r.left + r.width / 2)) / (innerWidth / 2));
+    ty = clamp((e.clientY - (r.top + r.height * 0.45)) / (innerHeight / 2));
+    if (!raf) raf = requestAnimationFrame(step);
+  }, { passive: true });
+  document.documentElement.addEventListener("pointerleave", () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(step); });
 })();
 
 /* ---------- In the app: tabs over real screens ---------- */

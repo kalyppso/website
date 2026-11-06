@@ -16,11 +16,12 @@
   --text: #f5f5f7;
   --text-2: #a1a1aa;
   --text-3: #73737c;
-  --accent: #ececf1;
+  /* Black, white and one grey. */
+  --accent: #dddedf;
   --accent-2: #ffffff;
-  --accent-hi: #f4f4f7;
-  --accent-ink: #d6d6de;
-  --accent-soft: rgba(255, 255, 255, 0.07);
+  --accent-hi: #dddedf;
+  --accent-ink: #dddedf;
+  --accent-soft: rgba(221, 222, 223, 0.08);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --font: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "Geist Mono", ui-monospace, "SF Mono", Consolas, monospace;
@@ -32,7 +33,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--font); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 img { display: block; max-width: 100%; height: auto; }
 a { color: inherit; }
-::selection { background: #f4f4f7; color: #000; }
+::selection { background: #dddedf; color: #000; }
 .i { width: 16px; height: 16px; flex: none; }
 .mono { font-family: var(--mono); font-size: 0.92em; }
 .spacer { flex: 1; }
@@ -83,19 +84,24 @@ h1 em { font-style: italic; color: var(--accent-hi); padding-right: 0.05em; }
 .gh-line:hover { color: var(--text); }
 .gh-line .i:last-child { width: 13px; height: 13px; }
 /* Kalypso, in fine white line: the logo. She is drawn in from the bottom, and her stars twinkle. */
-.portrait { position: relative; margin: 0; width: clamp(300px, 33vw, 460px); aspect-ratio: 912 / 1160; user-select: none; }
+.portrait { position: relative; margin: 0; width: clamp(300px, 33vw, 460px); aspect-ratio: 912 / 1160; user-select: none;
+  /* She turns toward the cursor: --x and --y run from -1 to 1, set in main.js. */
+  transform: perspective(1200px) rotateY(calc(var(--x, 0) * 10deg)) rotateX(calc(var(--y, 0) * -6deg)) translate3d(calc(var(--x, 0) * 8px), calc(var(--y, 0) * 5px), 0); }
+.portrait .eyes { fill: #fff; transform: translate(calc(var(--x, 0) * 7px), calc(var(--y, 0) * 3px)); }
 .portrait img { display: block; width: 100%; height: 100%; }
 .portrait .sky { position: absolute; inset: 0; width: 100%; height: 100%; }
-.portrait .sky circle { fill: #fff; opacity: 0; }
+.portrait .sky > circle { fill: #fff; opacity: 0; }
 @media (prefers-reduced-motion: no-preference) {
   .portrait img { animation: draw-in 2.2s var(--ease) 0.15s both; }
-  .portrait .sky circle { animation: twinkle 3.1s ease-in-out calc(2s + var(--d)) infinite; }
+  .portrait .sky > circle { animation: twinkle 3.1s ease-in-out calc(2s + var(--d)) infinite; }
+  .portrait .eyes { animation: eyes-in 0.8s var(--ease) 1.7s both; }
 }
 @keyframes draw-in {
   from { clip-path: inset(100% 0 0 0); opacity: 0.2; }
   to { clip-path: inset(0 0 0 0); opacity: 1; }
 }
 @keyframes twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 0.9; } }
+@keyframes eyes-in { from { opacity: 0; } }
 
 /* Tide lines: our own sea, drawn as thin contours either side of the headline. */
 @media (prefers-reduced-motion: no-preference) {
@@ -255,8 +261,8 @@ h2 { font-size: clamp(30px, 3.6vw, 44px); line-height: 1.08; letter-spacing: -0.
 main > .layers { padding-top: 96px; padding-bottom: 104px; }
 .layers .sub { margin: 0 0 40px; }
 /* ---------- The island: each layer a contour ring, and one call x-rayed ---------- */
-.isle { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: center; border: 1px solid var(--line-2); border-radius: 16px; background: #09080c; overflow: hidden; }
-.isle-map { display: block; width: 100%; height: auto; padding: 12px 8px; font-family: var(--mono); }
+.isle { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; border: 1px solid var(--line-2); border-radius: 16px; background: #09080c; overflow: hidden; }
+.isle-map { display: block; width: 100%; max-width: 900px; height: auto; padding: 24px 16px 4px; font-family: var(--mono); }
 .isle-map .contour { fill: none; stroke: rgba(255, 255, 255, 0.05); stroke-width: 1; }
 .isle-map .contour.sea { stroke-dasharray: 2 6; }
 /* Flat steps of tint, higher ground a little lighter: no gradients. */
@@ -289,31 +295,13 @@ main > .layers { padding-top: 96px; padding-bottom: 104px; }
 @keyframes ask { 0% { transform: scale(0.7); opacity: 1; } 100% { transform: scale(1.9); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .isle-map .packet { display: none; } }
 
-/* The x-ray: the same call, one row per layer. */
-.xray { display: flex; flex-direction: column; gap: 14px; padding: 26px 26px 24px; border-left: 1px solid var(--line-2); font-size: 14px; }
-.xr-head { display: flex; justify-content: space-between; margin: 0; font: 500 11.5px var(--mono); letter-spacing: 0.14em; color: var(--text-3); }
-.xray code { font: 500 12.5px var(--mono); }
-.xr-req, .xr-out { margin: 0; color: var(--text-2); }
-.xr-out { color: var(--accent-ink); }
-.xr-steps { list-style: none; margin: 0; padding: 0; border-left: 1px dashed var(--line-3); }
-.xr-steps li { display: grid; gap: 3px; padding: 11px 0 11px 18px; margin-left: -1px; border-left: 1px solid transparent; cursor: pointer; outline: none; transition: border-color 0.3s, opacity 0.3s; }
-.xr-k { font: 500 11.5px var(--mono); letter-spacing: 0.16em; color: var(--text); }
-.xr-t { color: var(--text-2); line-height: 1.45; }
-.xr-steps code { color: var(--text-3); transition: color 0.3s; }
-.isle[data-on] .xr-steps li { opacity: 0.42; }
-.isle[data-on] .xr-steps li.on { opacity: 1; border-left-color: var(--accent-hi); }
-.isle[data-on] .xr-steps li.on code { color: var(--accent-ink); }
-.xr-steps li:focus-visible { border-left-color: var(--accent-hi); }
-@media (max-width: 1080px) {
-  .isle { grid-template-columns: minmax(0, 1fr); }
-  .xray { border-left: 0; border-top: 1px solid var(--line-2); }
-}
+.isle-note { margin: 0; padding: 4px 24px 24px; min-height: 1.6em; text-align: center; font-size: 15px; color: var(--text-3); transition: color 0.3s; }
+.isle-note.on { color: var(--text); }
 @media (max-width: 640px) {
   .isle-map .m-label { font-size: 21px; }
   .isle-map .r-label, .isle-map .a-label { font-size: 19px; letter-spacing: 0.14em; }
   /* On a phone the x-ray right below says the same thing. */
   .isle-map .note { display: none; }
-  .xray { padding: 20px 18px; }
 }
 
 /* ---------- In the app: tabs over real screens ---------- */
