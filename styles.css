@@ -73,7 +73,7 @@ main > section + section { border-top: 1px solid var(--line); }
 [data-stars][hidden] { display: none; }
 
 /* ---------- Hero ---------- */
-.hero { display: grid !important; grid-template-columns: minmax(0, 1.1fr) auto; gap: 48px; align-items: center; padding-top: 96px !important; padding-bottom: 88px !important; min-height: min(86dvh, 780px); }
+.hero { display: grid !important; grid-template-columns: auto minmax(0, 1.1fr); gap: 48px; align-items: center; padding-top: 96px !important; padding-bottom: 88px !important; min-height: min(86dvh, 780px); }
 .hero-copy { min-width: 0; }
 h1 span { white-space: nowrap; }
 h1 { font-size: clamp(34px, 3.7vw, 54px); line-height: 1.08; letter-spacing: -0.05em; font-weight: 640; margin: 0 0 24px; padding-bottom: 6px; }
@@ -84,7 +84,7 @@ h1 em { font-style: italic; color: var(--accent-hi); padding-right: 0.05em; }
 .gh-line:hover { color: var(--text); }
 .gh-line .i:last-child { width: 13px; height: 13px; }
 /* Kalypso, drawn in code: characters on a canvas (main.js). */
-.portrait { margin: 0; width: clamp(300px, 36vw, 500px); user-select: none; }
+.portrait { order: -1; margin: 0; width: clamp(300px, 36vw, 500px); user-select: none; }
 .portrait canvas { display: block; width: 100%; }
 
 /* Tide lines: our own sea, drawn as thin contours either side of the headline. */
@@ -346,5 +346,5 @@ main > .layers { padding-top: 96px; padding-bottom: 104px; }
 
 @media (max-width: 820px) {
   .hero { grid-template-columns: 1fr; gap: 32px; min-height: 0; padding-top: 64px !important; }
-  .portrait { width: min(400px, 86vw); justify-self: center; }
+  .portrait { order: 0; width: min(400px, 86vw); justify-self: center; }
 }
