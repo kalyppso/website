@@ -244,48 +244,57 @@ h2 { font-size: clamp(30px, 3.6vw, 44px); line-height: 1.08; letter-spacing: -0.
 /* ---------- Layers ---------- */
 main > .layers { padding-top: 96px; padding-bottom: 104px; }
 .layers .sub { margin: 0 0 40px; }
-/* ---------- The island: each layer a contour ring, and one call x-rayed ---------- */
-.isle { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; border: 1px solid var(--line-2); border-radius: 16px; background: #09080c; overflow: hidden; }
-.isle-map { display: block; width: 100%; max-width: 900px; height: auto; padding: 24px 16px 4px; font-family: var(--mono); }
-.isle-map .contour { fill: none; stroke: rgba(255, 255, 255, 0.05); stroke-width: 1; }
-.isle-map .contour.sea { stroke-dasharray: 2 6; }
-/* Flat steps of tint, higher ground a little lighter: no gradients. */
-.isle-map .band { cursor: pointer; outline: none; }
-.isle-map .ring { fill: rgba(255, 255, 255, 0.022); stroke: #3d3a48; stroke-width: 1.2; transition: stroke 0.3s, fill 0.3s; }
-.isle-map .r-label { font-size: 15px; letter-spacing: 0.24em; fill: var(--text-3); transition: fill 0.3s; }
-.isle-map .call { fill: none; stroke: #4a4656; stroke-width: 1; stroke-dasharray: 3 4; pointer-events: none; }
-.isle-map .model-dot { fill: var(--text-2); }
-.isle-map .m-label { font: 500 20px var(--font); fill: var(--text); }
-.isle-map .agent { fill: var(--accent-hi); }
-.isle-map .agent-halo { fill: none; stroke: var(--accent-hi); stroke-opacity: 0.45; }
-.isle-map .a-label { font-size: 15px; letter-spacing: 0.22em; fill: var(--text-2); }
-.isle-map .stop path { stroke: #e5484d; stroke-width: 2.4; stroke-linecap: round; }
-.isle-map .note { font-size: 16px; fill: var(--text-3); }
-.isle-map .ask { fill: none; stroke: var(--accent-hi); stroke-width: 1.2; }
-.isle-map .packet { fill: var(--text); pointer-events: none; }
-.isle-map .packet.bad { fill: #e5484d; }
-.isle-map .note, .isle-map .stop, .isle-map .ask, .isle-map .agent, .isle-map .agent-halo, .isle-map .a-label, .isle-map .m-label, .isle-map .model-dot { pointer-events: none; }
-/* One layer picked: its ring and its row light up, the rest step back. */
-.isle[data-on] .ring { stroke: #2b2933; }
-.isle[data-on] .r-label { fill: #4b4855; }
-.isle[data-on="sandbox"] [data-layer="sandbox"] .ring, .isle[data-on="policies"] [data-layer="policies"] .ring,
-.isle[data-on="vault"] [data-layer="vault"] .ring, .isle[data-on="gateway"] [data-layer="gateway"] .ring { stroke: var(--accent-hi); fill: rgba(255, 255, 255, 0.06); }
-.isle[data-on="sandbox"] [data-layer="sandbox"] .r-label, .isle[data-on="policies"] [data-layer="policies"] .r-label,
-.isle[data-on="vault"] [data-layer="vault"] .r-label, .isle[data-on="gateway"] [data-layer="gateway"] .r-label { fill: var(--accent-ink); }
-.isle-map .band:focus-visible .ring { stroke: var(--accent-hi); }
+/* ---------- The layers, in her wireframe: four mesh panels on the call's line ---------- */
+.isle { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; border: 1px solid var(--line-2); border-radius: 16px; background: #050506; overflow: hidden; }
+.gates-map { display: block; width: 100%; max-width: 980px; height: auto; padding: 28px 20px 0; font-family: var(--mono); }
+.gates-map .wire { fill: none; stroke: rgba(236, 236, 240, 0.32); stroke-width: 1; }
+.gates-map .fan { fill: none; stroke: rgba(236, 236, 240, 0.32); stroke-width: 1; }
+.gates-map .ghost { fill: none; stroke: rgba(236, 236, 240, 0.12); stroke-width: 1; stroke-dasharray: 2 5; }
+.gates-map .gate { cursor: pointer; outline: none; }
+.gates-map .hit { fill: rgba(236, 236, 240, 0.015); transition: fill 0.3s; }
+.gates-map .mesh { fill: none; stroke: rgba(236, 236, 240, 0.26); stroke-width: 0.8; transition: stroke 0.3s; }
+.gates-map .rim { fill: none; stroke: rgba(236, 236, 240, 0.62); stroke-width: 1; transition: stroke 0.3s; }
+.gates-map .node { fill: rgba(244, 244, 247, 0.85); }
+.gates-map .pierce { fill: #fff; }
+.gates-map .g-num { font-size: 12px; letter-spacing: 0.16em; fill: var(--text-3); }
+.gates-map .g-label { font-size: 13px; letter-spacing: 0.2em; fill: var(--text-2); transition: fill 0.3s; }
+.gates-map .agent { fill: #fff; }
+.gates-map .agent-ring { fill: none; stroke: rgba(236, 236, 240, 0.5); }
+.gates-map .a-label { font-size: 12px; letter-spacing: 0.2em; fill: var(--text-2); }
+.gates-map .model { fill: #fff; }
+.gates-map .m-label { font: 500 15px var(--font); fill: var(--text); }
+.gates-map .note { font-size: 12px; fill: var(--text-3); }
+.gates-map .stop path { stroke: #e5484d; stroke-width: 2; stroke-linecap: round; }
+.gates-map .ask { fill: none; stroke: #fff; stroke-width: 1.1; }
+.gates-map .packet { fill: #fff; }
+.gates-map .packet.bad { fill: #e5484d; }
+.gates-map .wire, .gates-map .fan, .gates-map .ghost, .gates-map .note, .gates-map .stop, .gates-map .ask, .gates-map .packet,
+.gates-map .pierce, .gates-map .agent, .gates-map .agent-ring, .gates-map .model, .gates-map .m-label, .gates-map .a-label { pointer-events: none; }
+/* One layer picked: its panel lights up, the others step back. */
+.isle[data-on] .gate { opacity: 0.45; transition: opacity 0.3s; }
+.isle[data-on="sandbox"] [data-layer="sandbox"], .isle[data-on="policies"] [data-layer="policies"],
+.isle[data-on="vault"] [data-layer="vault"], .isle[data-on="gateway"] [data-layer="gateway"] { opacity: 1; }
+.isle[data-on] .gate:is([data-layer]) .mesh { stroke: rgba(236, 236, 240, 0.26); }
+.isle[data-on="sandbox"] [data-layer="sandbox"] .mesh, .isle[data-on="policies"] [data-layer="policies"] .mesh,
+.isle[data-on="vault"] [data-layer="vault"] .mesh, .isle[data-on="gateway"] [data-layer="gateway"] .mesh { stroke: rgba(244, 244, 247, 0.6); }
+.isle[data-on="sandbox"] [data-layer="sandbox"] .rim, .isle[data-on="policies"] [data-layer="policies"] .rim,
+.isle[data-on="vault"] [data-layer="vault"] .rim, .isle[data-on="gateway"] [data-layer="gateway"] .rim { stroke: #fff; }
+.isle[data-on="sandbox"] [data-layer="sandbox"] .g-label, .isle[data-on="policies"] [data-layer="policies"] .g-label,
+.isle[data-on="vault"] [data-layer="vault"] .g-label, .isle[data-on="gateway"] [data-layer="gateway"] .g-label { fill: var(--text); }
+.gates-map .gate:focus-visible .rim { stroke: #fff; }
 @media (prefers-reduced-motion: no-preference) {
-  .isle-map .ask { animation: ask 2.4s var(--ease) infinite; transform-box: fill-box; transform-origin: center; }
+  .gates-map .ask { animation: ask 2.4s var(--ease) infinite; transform-box: fill-box; transform-origin: center; }
 }
 @keyframes ask { 0% { transform: scale(0.7); opacity: 1; } 100% { transform: scale(1.9); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .isle-map .packet { display: none; } }
-
-.isle-note { margin: 0; padding: 4px 24px 24px; min-height: 1.6em; text-align: center; font-size: 15px; color: var(--text-3); transition: color 0.3s; }
+@media (prefers-reduced-motion: reduce) { .gates-map .packet { display: none; } }
+.isle-note { margin: 0; padding: 8px 24px 26px; min-height: 1.6em; text-align: center; font-size: 15px; color: var(--text-3); transition: color 0.3s; }
 .isle-note.on { color: var(--text); }
 @media (max-width: 640px) {
-  .isle-map .m-label { font-size: 21px; }
-  .isle-map .r-label, .isle-map .a-label { font-size: 19px; letter-spacing: 0.14em; }
-  /* On a phone the x-ray right below says the same thing. */
-  .isle-map .note { display: none; }
+  .gates-map { padding: 16px 4px 0; }
+  .gates-map .m-label { font-size: 22px; }
+  .gates-map .g-label, .gates-map .a-label { font-size: 17px; letter-spacing: 0.1em; }
+  .gates-map .g-num { display: none; }
+  .gates-map .note { display: none; }
 }
 
 /* ---------- In the app: tabs over real screens ---------- */
@@ -307,7 +316,15 @@ main > .layers { padding-top: 96px; padding-bottom: 104px; }
 .show-tabs .bar { position: absolute; left: 14px; right: 14px; top: 0; height: 2px; border-radius: 2px; background: var(--line-2); overflow: hidden; opacity: 0; transition: opacity 0.25s; }
 .show-tabs button[aria-selected="true"] .bar { opacity: 1; }
 .show-tabs .bar::after { content: ""; position: absolute; inset: 0; background: var(--text); transform-origin: left; transform: scaleX(var(--p, 1)); }
-.show-frame { position: relative; overflow: hidden; aspect-ratio: 16 / 10; border: 1px solid var(--line-2); border-radius: 14px; background: var(--panel); outline: none; }
+.show-main { perspective: 1800px; }
+/* The screen sits deep in its own shadow, tipped back a little until it comes into view. */
+.show-frame { position: relative; overflow: hidden; aspect-ratio: 16 / 10; border: 1px solid var(--line-2); border-radius: 14px; background: var(--panel); outline: none;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 30px 60px -20px rgba(0, 0, 0, 0.95), 0 70px 140px -40px rgba(221, 222, 223, 0.13), 0 0 0 1px rgba(0, 0, 0, 0.6);
+  transform-origin: 50% 100%; }
+@media (prefers-reduced-motion: no-preference) {
+  .show-frame { transform: rotateX(9deg) scale(0.965); opacity: 0.75; transition: transform 1.1s var(--ease), opacity 1.1s var(--ease); }
+  .show.in .show-frame { transform: none; opacity: 1; }
+}
 .show-shot { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity 0.45s var(--ease); pointer-events: none; }
 .show-shot.on { opacity: 1; pointer-events: auto; }
 .show-shot picture, .show-shot img { display: block; width: 100%; height: 100%; border-radius: 13px; overflow: hidden; }
@@ -322,6 +339,9 @@ main > .layers { padding-top: 96px; padding-bottom: 104px; }
 .show-shot .leader { position: absolute; width: 38px; height: 1.5px; background: var(--accent); transform-origin: 0 50%; transform: rotate(-40deg); }
 .show-shot[data-tab="policies"] .callout, .show-shot[data-tab="sandboxes"] .callout { transform: translate(calc(-100% - 28px), calc(-100% - 25px)); }
 .show-shot[data-tab="policies"] .leader, .show-shot[data-tab="sandboxes"] .leader { transform: rotate(-140deg); }
+/* Near the top edge: the label hangs below the pin instead. */
+.show-shot[data-tab="agents"] .callout { transform: translate(28px, 25px); }
+.show-shot[data-tab="agents"] .leader { transform: rotate(40deg); }
 @media (prefers-reduced-motion: no-preference) {
   .show-shot.on .pin { animation: pin-in 0.6s var(--ease) 0.25s both; }
   .show-shot.on .callout, .show-shot.on .leader { animation: callout-in 0.6s var(--ease) 0.35s both; }
