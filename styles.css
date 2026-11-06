@@ -83,25 +83,9 @@ h1 em { font-style: italic; color: var(--accent-hi); padding-right: 0.05em; }
 .gh-line { margin-top: 20px; display: inline-flex; align-items: center; gap: 8px; color: var(--text-3); text-decoration: none; font-size: 14px; transition: color 0.2s; }
 .gh-line:hover { color: var(--text); }
 .gh-line .i:last-child { width: 13px; height: 13px; }
-/* Kalypso, in fine white line: the logo. She is drawn in from the bottom, and her stars twinkle. */
-.portrait { position: relative; margin: 0; width: clamp(300px, 33vw, 460px); aspect-ratio: 912 / 1160; user-select: none;
-  /* She turns toward the cursor: --x and --y run from -1 to 1, set in main.js. */
-  transform: perspective(1200px) rotateY(calc(var(--x, 0) * 10deg)) rotateX(calc(var(--y, 0) * -6deg)) translate3d(calc(var(--x, 0) * 8px), calc(var(--y, 0) * 5px), 0); }
-.portrait .eyes { fill: #fff; transform: translate(calc(var(--x, 0) * 7px), calc(var(--y, 0) * 3px)); }
-.portrait img { display: block; width: 100%; height: 100%; }
-.portrait .sky { position: absolute; inset: 0; width: 100%; height: 100%; }
-.portrait .sky > circle { fill: #fff; opacity: 0; }
-@media (prefers-reduced-motion: no-preference) {
-  .portrait img { animation: draw-in 2.2s var(--ease) 0.15s both; }
-  .portrait .sky > circle { animation: twinkle 3.1s ease-in-out calc(2s + var(--d)) infinite; }
-  .portrait .eyes { animation: eyes-in 0.8s var(--ease) 1.7s both; }
-}
-@keyframes draw-in {
-  from { clip-path: inset(100% 0 0 0); opacity: 0.2; }
-  to { clip-path: inset(0 0 0 0); opacity: 1; }
-}
-@keyframes twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 0.9; } }
-@keyframes eyes-in { from { opacity: 0; } }
+/* Kalypso, drawn in code: characters on a canvas (main.js). */
+.portrait { margin: 0; width: clamp(300px, 36vw, 500px); user-select: none; }
+.portrait canvas { display: block; width: 100%; }
 
 /* Tide lines: our own sea, drawn as thin contours either side of the headline. */
 @media (prefers-reduced-motion: no-preference) {
@@ -355,8 +339,12 @@ main > .layers { padding-top: 96px; padding-bottom: 104px; }
 }
 
 @media (max-width: 1080px) {
-  .hero { grid-template-columns: 1fr; gap: 32px; min-height: 0; padding-top: 64px !important; }
-  .portrait { width: min(380px, 78vw); justify-self: center; }
+
 }
 @media (max-width: 640px) {
+}
+
+@media (max-width: 820px) {
+  .hero { grid-template-columns: 1fr; gap: 32px; min-height: 0; padding-top: 64px !important; }
+  .portrait { width: min(400px, 86vw); justify-self: center; }
 }
