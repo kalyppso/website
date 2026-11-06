@@ -181,56 +181,6 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
   targets.forEach((t) => watch.observe(t));
 })();
 
-/* ---------- Kalypso, in ASCII ---------- */
-
-// She decodes into place on load, then a slow tide moves through the waves below her.
-(function kalypso() {
-  const pre = $("#kalypso");
-  if (!pre) return;
-  const art = pre.textContent;
-  const RAMP = " .,:;=+*#";
-  const lines = art.split("\n");
-  const tideFrom = Math.floor(lines.length * 0.68); // the waves: the bottom third
-  if (reduce) return;
-
-  // 1. Decode: each character settles at its own moment within the first 1.3 s.
-  const settle = [...art].map((c) => (c === " " || c === "\n" ? 0 : 200 + Math.random() * 1100));
-  const t0 = performance.now();
-  const decode = (now) => {
-    const t = now - t0;
-    let done = true;
-    pre.textContent = [...art].map((c, i) => {
-      if (t >= settle[i]) return c;
-      done = false;
-      return RAMP[1 + Math.floor(Math.random() * (RAMP.length - 1))];
-    }).join("");
-    if (done) startTide(); else requestAnimationFrame(decode);
-  };
-  requestAnimationFrame(decode);
-
-  // 2. Tide: a slow swell of brightness rolling through the waves, only while she's on screen.
-  let visible = true, timer = null, phase = 0;
-  function frame() {
-    phase += 0.35;
-    pre.textContent = lines.map((line, y) => {
-      if (y < tideFrom) return line;
-      return [...line].map((c, x) => {
-        const i = RAMP.indexOf(c);
-        if (i <= 0) return c;
-        const swell = Math.round(Math.sin(x * 0.18 - phase + y * 0.6) * 1.2);
-        return RAMP[Math.max(1, Math.min(RAMP.length - 1, i + swell))];
-      }).join("");
-    }).join("\n");
-  }
-  function startTide() {
-    new IntersectionObserver(([e]) => {
-      visible = e.isIntersecting;
-      clearInterval(timer);
-      if (visible) timer = setInterval(frame, 140);
-    }).observe(pre);
-  }
-})();
-
 /* ---------- The island: point at a layer ---------- */
 
 (function isle() {

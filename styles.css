@@ -16,11 +16,11 @@
   --text: #f5f5f7;
   --text-2: #a1a1aa;
   --text-3: #73737c;
-  --accent: #5b2aaa;
-  --accent-2: #6a37c2;
-  --accent-hi: #a78bfa;
-  --accent-ink: #c4b5fd;
-  --accent-soft: color-mix(in srgb, var(--accent) 22%, transparent);
+  --accent: #ececf1;
+  --accent-2: #ffffff;
+  --accent-hi: #f4f4f7;
+  --accent-ink: #d6d6de;
+  --accent-soft: rgba(255, 255, 255, 0.07);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --font: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "Geist Mono", ui-monospace, "SF Mono", Consolas, monospace;
@@ -32,7 +32,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--font); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 img { display: block; max-width: 100%; height: auto; }
 a { color: inherit; }
-::selection { background: color-mix(in srgb, var(--accent) 65%, transparent); color: #fff; }
+::selection { background: #f4f4f7; color: #000; }
 .i { width: 16px; height: 16px; flex: none; }
 .mono { font-family: var(--mono); font-size: 0.92em; }
 .spacer { flex: 1; }
@@ -82,8 +82,20 @@ h1 em { font-style: italic; color: var(--accent-hi); padding-right: 0.05em; }
 .gh-line { margin-top: 20px; display: inline-flex; align-items: center; gap: 8px; color: var(--text-3); text-decoration: none; font-size: 14px; transition: color 0.2s; }
 .gh-line:hover { color: var(--text); }
 .gh-line .i:last-child { width: 13px; height: 13px; }
-/* Kalypso, drawn in characters from the logo. */
-.kalypso { margin: 0; font: 500 clamp(6px, 0.66vw, 9.5px) / 1.18 var(--mono); letter-spacing: 0.02em; color: var(--accent-hi); white-space: pre; user-select: none; }
+/* Kalypso, in fine white line: the logo. She is drawn in from the bottom, and her stars twinkle. */
+.portrait { position: relative; margin: 0; width: clamp(300px, 33vw, 460px); aspect-ratio: 912 / 1160; user-select: none; }
+.portrait img { display: block; width: 100%; height: 100%; }
+.portrait .sky { position: absolute; inset: 0; width: 100%; height: 100%; }
+.portrait .sky circle { fill: #fff; opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .portrait img { animation: draw-in 2.2s var(--ease) 0.15s both; }
+  .portrait .sky circle { animation: twinkle 3.1s ease-in-out calc(2s + var(--d)) infinite; }
+}
+@keyframes draw-in {
+  from { clip-path: inset(100% 0 0 0); opacity: 0.2; }
+  to { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+@keyframes twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 0.9; } }
 
 /* Tide lines: our own sea, drawn as thin contours either side of the headline. */
 @media (prefers-reduced-motion: no-preference) {
@@ -249,7 +261,7 @@ main > .layers { padding-top: 96px; padding-bottom: 104px; }
 .isle-map .contour.sea { stroke-dasharray: 2 6; }
 /* Flat steps of tint, higher ground a little lighter: no gradients. */
 .isle-map .band { cursor: pointer; outline: none; }
-.isle-map .ring { fill: rgba(167, 139, 250, 0.028); stroke: #3d3a48; stroke-width: 1.2; transition: stroke 0.3s, fill 0.3s; }
+.isle-map .ring { fill: rgba(255, 255, 255, 0.022); stroke: #3d3a48; stroke-width: 1.2; transition: stroke 0.3s, fill 0.3s; }
 .isle-map .r-label { font-size: 15px; letter-spacing: 0.24em; fill: var(--text-3); transition: fill 0.3s; }
 .isle-map .call { fill: none; stroke: #4a4656; stroke-width: 1; stroke-dasharray: 3 4; pointer-events: none; }
 .isle-map .model-dot { fill: var(--text-2); }
@@ -267,7 +279,7 @@ main > .layers { padding-top: 96px; padding-bottom: 104px; }
 .isle[data-on] .ring { stroke: #2b2933; }
 .isle[data-on] .r-label { fill: #4b4855; }
 .isle[data-on="sandbox"] [data-layer="sandbox"] .ring, .isle[data-on="policies"] [data-layer="policies"] .ring,
-.isle[data-on="vault"] [data-layer="vault"] .ring, .isle[data-on="gateway"] [data-layer="gateway"] .ring { stroke: var(--accent-hi); fill: rgba(167, 139, 250, 0.08); }
+.isle[data-on="vault"] [data-layer="vault"] .ring, .isle[data-on="gateway"] [data-layer="gateway"] .ring { stroke: var(--accent-hi); fill: rgba(255, 255, 255, 0.06); }
 .isle[data-on="sandbox"] [data-layer="sandbox"] .r-label, .isle[data-on="policies"] [data-layer="policies"] .r-label,
 .isle[data-on="vault"] [data-layer="vault"] .r-label, .isle[data-on="gateway"] [data-layer="gateway"] .r-label { fill: var(--accent-ink); }
 .isle-map .band:focus-visible .ring { stroke: var(--accent-hi); }
@@ -329,9 +341,9 @@ main > .layers { padding-top: 96px; padding-bottom: 104px; }
 .show-shot picture, .show-shot img { display: block; width: 100%; height: 100%; border-radius: 13px; overflow: hidden; }
 .show-shot img { object-fit: cover; object-position: top left; }
 /* The callout: a pin on the thing that matters, and a label beside it. */
-.show-shot .pin { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 2px solid #fff; background: var(--accent); }
+.show-shot .pin { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 2px solid #000; background: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .show-shot .callout {
-  position: absolute; transform: translate(28px, calc(-100% - 25px)); padding: 9px 14px; border-radius: 10px; background: var(--accent); color: #fff;
+  position: absolute; transform: translate(28px, calc(-100% - 25px)); padding: 9px 14px; border-radius: 10px; background: var(--accent); color: #0a0a0c;
   font: 500 15px var(--font); white-space: nowrap; box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.8);
 }
 /* The leader runs from the pin up to the bubble's near corner. */
@@ -356,8 +368,7 @@ main > .layers { padding-top: 96px; padding-bottom: 104px; }
 
 @media (max-width: 1080px) {
   .hero { grid-template-columns: 1fr; gap: 32px; min-height: 0; padding-top: 64px !important; }
-  .kalypso { font-size: clamp(6px, 1.5vw, 10px); justify-self: center; }
+  .portrait { width: min(380px, 78vw); justify-self: center; }
 }
 @media (max-width: 640px) {
-  .kalypso { font-size: 1.3vw; }
 }
