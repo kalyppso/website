@@ -108,6 +108,11 @@ function platform() {
 }
 
 async function latestRelease() {
+  // First the copy published with the site (no rate limit), then GitHub's API as a fallback.
+  try {
+    const own = await fetch("release.json", { cache: "no-cache" });
+    if (own.ok) { const r = await own.json(); if (r && r.assets && r.assets.length) return r; }
+  } catch { /* not deployed yet, or opened as a file */ }
   const res = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=10`, { headers: { Accept: "application/vnd.github+json" } });
   if (!res.ok) throw new Error(String(res.status));
   const all = (await res.json()).filter((r) => !r.draft && r.assets.length);

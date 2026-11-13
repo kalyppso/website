@@ -1,9 +1,12 @@
 name: Deploy
 
-# Publishes the site to GitHub Pages on every push to main.
+# Publishes the site to GitHub Pages on every push to main, and every hour so the download
+# links follow new releases of KALYPSO without anyone touching this repository.
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -23,6 +26,19 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      # The latest full release (release candidates are for testing), with its download links,
+      # published next to the page as release.json. Visitors read that file, so the links never
+      # depend on GitHub's 60-requests-an-hour limit for anonymous API calls.
+      - name: Write release.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/kalyppso/kalypso/releases?per_page=20" --jq '
+            [ .[] | select(.draft | not) | select(.assets | length > 0) ]
+            | (map(select(.prerelease | not)) + .) | first
+            | { tag_name, published_at, prerelease,
+                assets: [ .assets[] | { name, browser_download_url } ] }' > release.json
+          cat release.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
