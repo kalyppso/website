@@ -108,10 +108,11 @@ function platform() {
 }
 
 async function latestRelease() {
-  // The list includes pre-releases, which /releases/latest skips; 0.x builds are pre-releases.
   const res = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=10`, { headers: { Accept: "application/vnd.github+json" } });
   if (!res.ok) throw new Error(String(res.status));
-  return (await res.json()).find((r) => !r.draft && r.assets.length) ?? null;
+  const all = (await res.json()).filter((r) => !r.draft && r.assets.length);
+  // Release candidates are for testing: offer the latest full release, a pre-release only if there is nothing else.
+  return all.find((r) => !r.prerelease) ?? all[0] ?? null;
 }
 
 (async () => {
@@ -368,32 +369,33 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
   });
   select(0);
 
-  const DUR = 6000;
-  const show0 = $(".show");
-  let inView = false, hover = false, start = 0, raf = 0;
-  const bar = () => tabs.find((t) => t.getAttribute("aria-selected") === "true");
-  const tick = (now) => {
-    raf = 0;
-    if (!inView || hover || reduce) return;
-    if (!start) start = now;
-    const p = Math.min(1, (now - start) / DUR);
-    bar()?.style.setProperty("--p", p.toFixed(4));
-    if (p >= 1) {
-      const now_i = tabs.indexOf(bar());
-      tabs.forEach((t) => t.style.setProperty("--p", "0"));
-      select(now_i + 1);
-      start = now;
-    }
-    raf = requestAnimationFrame(tick);
-  };
-  const run = () => { if (!raf && inView && !hover && !reduce) { start = performance.now() - parseFloat(bar()?.style.getPropertyValue("--p") || "0") * DUR; raf = requestAnimationFrame(tick); } };
-  tabs.forEach((t) => t.addEventListener("click", () => { tabs.forEach((x) => x.style.setProperty("--p", "0")); start = performance.now(); }));
-  show0.addEventListener("pointerenter", () => { hover = true; });
-  show0.addEventListener("pointerleave", () => { hover = false; run(); });
-  show0.addEventListener("focusin", () => { hover = true; });
-  show0.addEventListener("focusout", () => { hover = false; run(); });
-  new IntersectionObserver(([e]) => { inView = e.intersectionRatio >= 0.55; if (inView) run(); }, { threshold: [0, 0.55, 1] }).observe(show0);
-  if (reduce) tabs.forEach((t) => t.style.setProperty("--p", "1"));
+  // Scrolling moves through the tabs: the section stays pinned while you scroll, and each
+  // stretch of scrolling selects the next tab. One marker per tab covers its stretch.
+  const pin = $(".show-pin");
+  if (pin && !reduce) {
+    const marks = tabs.map((t, k) => {
+      const m = document.createElement("i");
+      m.className = "show-mark";
+      m.style.top = `${(k / tabs.length) * 100}%`;
+      m.style.height = `${100 / tabs.length}%`;
+      pin.append(m);
+      new IntersectionObserver(([e]) => { if (e.isIntersecting) select(k); }, { rootMargin: "-50% 0px -50% 0px" }).observe(m);
+      return m;
+    });
+    // The bar on each tab fills as you scroll through its stretch.
+    const steps = Array.from({ length: 21 }, (_, i) => i / 20);
+    marks.forEach((m, k) => new IntersectionObserver(([e]) => {
+      const r = e.boundingClientRect, mid = innerHeight / 2;
+      tabs[k].style.setProperty("--p", Math.min(1, Math.max(0, (mid - r.top) / r.height)).toFixed(3));
+    }, { threshold: steps }).observe(m));
+    // A click scrolls to that tab's stretch, so scrolling and clicking agree.
+    tabs.forEach((t, k) => t.addEventListener("click", () => {
+      const top = marks[k].getBoundingClientRect().top + scrollY - innerHeight / 2 + 8;
+      scrollTo({ top, behavior: "smooth" });
+    }));
+  } else {
+    tabs.forEach((t) => t.style.setProperty("--p", "1"));
+  }
 
   // The screen settles flat once it's well in view.
   const show = $(".show");
@@ -501,9 +503,9 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
           l *= 0.82 + 0.3 * Math.exp(-(((y / H) - (1.2 - py * 1.4)) ** 2) * 9);
           if (mx >= 0) { const d2 = (x - mx) ** 2 + (y - my) ** 2; l += 0.5 * Math.exp(-d2 / 2600); }
           // Every cell keeps a faint dot, so the grid reads as one surface; light grows it.
-          const r = r0 * (light ? 0.12 + 0.7 * Math.min(1, l) ** 1.3 : 0.16 + 0.84 * Math.min(1, l) ** 1.15);
+          const r = r0 * (light ? 0.14 + 0.86 * Math.min(1, l) ** 1.2 : 0.16 + 0.84 * Math.min(1, l) ** 1.15);
           const [cr, cg, cb] = tint(x / W, y / H);
-          ctx.fillStyle = `rgba(${cr},${cg},${cb},${(light ? 0.1 + 0.55 * Math.min(1, l) ** 1.4 : 0.22 + 0.78 * Math.min(1, l)).toFixed(2)})`;
+          ctx.fillStyle = `rgba(${cr},${cg},${cb},${(light ? 0.14 + 0.8 * Math.min(1, l) ** 1.25 : 0.22 + 0.78 * Math.min(1, l)).toFixed(2)})`;
           ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
         }
       }
@@ -528,28 +530,27 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
 })();
 
 /* ---------- The chat orb from the app: a ring of bars around an egg-shaped body ---------- */
-(function siteOrb() {
-  const el = $(".site-orb");
-  if (!el) return;
-  const ctx = el.getContext("2d"), size = 132;
+// makeOrb(canvas, size) draws it and returns controls: beat() for a keystroke, kick() for a
+// wave round the ring, active(on) to wake it.
+function makeOrb(el, size) {
+  const ctx = el.getContext("2d");
   const dpr = Math.min(devicePixelRatio || 1, 2);
   el.width = el.height = Math.round(size * dpr);
+  el.style.width = el.style.height = size + "px";
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const bars = 72, c = size / 2, core = size * 0.24, base = size * 0.31, reach = size * 0.17, width = Math.max(1.25, size * 0.016);
-  let energy = 0, spin = 0, wave = 0, waveAt = 0, level = 0, beats = 0, kick = 0, rgb = "236,236,240";
+  let energy = 0, spin = 0, wave = 0, waveAt = 0, level = 0, beats = 0, kick = 0, on = false, rgb = "236,236,240";
   const heights = new Float32Array(bars), jolt = new Float32Array(bars);
   const readColour = () => { const m = /rgba?\(([^)]+)\)/.exec(getComputedStyle(el).color); if (m) rgb = m[1].split(",").slice(0, 3).join(","); };
   readColour(); addEventListener("themechange", readColour);
   const rgba = (a) => `rgba(${rgb},${a.toFixed(3)})`;
-  let last = performance.now(), raf = 0, visible = false, hover = false, lastMove = 0;
+  let last = performance.now(), raf = 0, visible = false;
   const t0 = last;
   const draw = (now) => {
     const dt = Math.min((now - last) / 1000, 0.05); last = now; const t = (now - t0) / 1000;
     if (beats > 0) { level = Math.min(1, level + 0.28 * beats); for (let i = 0; i < bars; i++) jolt[i] = Math.max(jolt[i], Math.random() ** 2 * (0.6 + 0.4 * level)); beats = 0; }
     level *= Math.exp(-dt * 2.6); for (let i = 0; i < bars; i++) jolt[i] *= Math.exp(-dt * 5);
-    // On the site it shows itself: it wakes on its own every few seconds, and while you're over it.
-    const auto = (Math.sin(t * 0.55) + 1) / 2 > 0.82 ? 1 : 0;
-    const target = hover || auto ? 1 : 0;
+    const target = on ? 1 : 0;
     energy += (target - energy) * (1 - Math.exp(-dt * (target > energy ? 4 : 2)));
     spin += dt * (0.08 + energy * 0.35);
     if (kick) { wave = 1; waveAt = 0; kick = 0; }
@@ -581,12 +582,64 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
     raf = visible && !reduce && !document.hidden ? requestAnimationFrame(draw) : 0;
   };
   const resume = () => { if (!raf && visible && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(draw); } };
-  new IntersectionObserver(([e]) => { visible = e.isIntersecting; resume(); }).observe(el);
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting && e.target.offsetParent !== null; resume(); }).observe(el);
   document.addEventListener("visibilitychange", resume);
-  el.addEventListener("pointerenter", () => { hover = true; });
-  el.addEventListener("pointerleave", () => { hover = false; });
-  // Moving over it is like typing: each movement is a beat, a few per second at most.
-  el.addEventListener("pointermove", () => { const n = performance.now(); if (n - lastMove > 90) { beats++; lastMove = n; } });
-  el.addEventListener("click", () => { kick = 1; });
   if (reduce) { visible = true; draw(performance.now()); }
+  return { beat: () => { beats++; }, kick: () => { kick = 1; }, active: (v) => { on = v; }, wake: () => { visible = true; resume(); } };
+}
+
+/* ---------- Ask, in the window: a replay of a real chat with kalypso ---------- */
+(function askDemo() {
+  const panel = $('.panel[data-panel="ask"]');
+  if (!panel) return;
+  const orb = makeOrb($(".demo-orb"), 112);
+  const start = $("#ad-start"), log = $("#ad-log"), text = $("#ad-text"), status = $("#ask-status");
+  const ASK = "The login test is flaky on CI and the README is out of date. Can you sort both out?";
+  // [kind, text, wait ms after]
+  const RUN = [
+    ["user", ASK, 900],
+    ["text", "Two separate jobs, so I'll run them in parallel: <b>coder</b> takes the flaky test, and a new <b>writer</b> agent updates the README.", 1100],
+    ["tool", "kx-agent|list", 600],
+    ["tool", "kx-agent|create writer --role \"Keeps the docs accurate\"", 700],
+    ["tool", "kx-agent|send coder \"tests/auth/login.test.ts fails 1 in 7 runs…\" --wait 0", 650],
+    ["tool", "kx-agent|send writer \"Update the install steps in README.md…\" --wait 0", 650],
+    ["tool", "kx-agent|wait coder", 1500],
+    ["tool", "kx-agent|wait writer", 1200],
+    ["text", "Both are done. <b>coder</b> fixed the flaky test: it checked the URL before the redirect finished, and now 20 of 20 runs pass. <b>writer</b> rewrote the README's install section for Docker and Podman.", 1200],
+    ["done", "Done · 9 turns · $0.05", 5200],
+  ];
+  const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  let timers = [], running = false, inView = false;
+  const later = (ms, fn) => timers.push(setTimeout(fn, ms));
+  const clear = () => { timers.forEach(clearTimeout); timers = []; };
+  const setStatus = (t, done) => { status.lastChild.textContent = t; status.classList.toggle("done", !!done); };
+  const add = ([kind, t]) => {
+    const li = document.createElement("li");
+    li.className = `ad-${kind} new`;
+    if (kind === "tool") { const [tool, arg] = t.split("|"); li.innerHTML = `<i>Bash</i><b>${tool}</b> ${esc(arg)}`; }
+    else li.innerHTML = kind === "text" ? t : esc(t);
+    log.append(li);
+    log.scrollTop = log.scrollHeight;
+  };
+  const play = () => {
+    clear(); running = true;
+    log.replaceChildren(); text.textContent = ""; start.classList.remove("gone"); setStatus("Ready");
+    orb.active(false);
+    // Type the request: the orb takes every keystroke.
+    let t = 1400;
+    for (let k = 1; k <= ASK.length; k++) later((t += 38 + (k % 7 === 0 ? 70 : 0)), () => { text.textContent = ASK.slice(0, k); orb.beat(); });
+    // Send: the start screen gives way to the conversation.
+    later((t += 500), () => { orb.kick(); orb.active(true); });
+    later((t += 700), () => { start.classList.add("gone"); text.textContent = ""; setStatus("Working"); });
+    for (const r of RUN) { later((t += 120), () => add(r)); t += r[2]; if (r[0] === "done") later(t - r[2] + 130, () => setStatus("Waiting for a message", true)); }
+    later(t, () => { running = false; if (inView && panel.classList.contains("on")) play(); });
+  };
+  const check = () => {
+    const on = inView && panel.classList.contains("on");
+    if (on && !running) play();
+    if (!on && running) { clear(); running = false; }
+  };
+  if (reduce) { start.classList.add("gone"); RUN.forEach(add); setStatus("Waiting for a message", true); return; }
+  new IntersectionObserver(([e]) => { inView = e.isIntersecting; check(); }, { threshold: 0.35 }).observe(panel.closest(".win"));
+  new MutationObserver(check).observe(panel, { attributes: true, attributeFilter: ["class"] });
 })();

@@ -595,7 +595,6 @@ main > .uses { padding-top: 104px; padding-bottom: 104px; }
 .foot-sign { display: none; }
 
 /* ---------- The chat orb, above the Ask headline ---------- */
-.site-orb { display: block; width: 132px; height: 132px; margin: 0 0 22px -14px; color: var(--text); cursor: pointer; }
 
 /* ---------- Hand off: an even 2 x 2 grid ---------- */
 .uses-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
@@ -616,3 +615,56 @@ main > .uses { padding-top: 104px; padding-bottom: 104px; }
 
 /* ---------- No leftover glows ---------- */
 main > .ask::after, main > .get::after { display: none !important; }
+
+/* ---------- Tabs: scrolling moves through them ---------- */
+.show-pin { position: relative; height: calc(5 * 62vh + 560px); margin-top: 96px; }
+.show-pin > .show { position: sticky; top: 88px; margin-top: 0; }
+.show-mark { position: absolute; left: 0; width: 1px; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .show-pin { height: auto; } .show-pin > .show { position: static; } }
+@media (max-width: 1080px) { .show-pin { height: calc(5 * 55vh + 640px); } }
+
+/* ---------- The window, like today's app ---------- */
+.ws-group { display: block; padding: 12px 9px 4px; font-size: 11px; color: var(--text-3); }
+.ws-group:first-child { padding-top: 0; }
+.ask-who { display: inline-flex; align-items: center; gap: 7px; }
+.ask-who img { opacity: 0.75; }
+.ask-who b { color: var(--text); font-weight: 600; }
+.panel[data-panel="ask"] { display: flex; flex-direction: column; }
+.ad { position: relative; flex: 1; min-height: 0; }
+.ad-start { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; transition: opacity 0.5s var(--ease), transform 0.6s var(--ease); }
+.ad-start.gone { opacity: 0; transform: translateY(-14px) scale(0.96); pointer-events: none; }
+.ad-start p { margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
+.demo-orb { display: block; color: var(--text); }
+.ad-log { list-style: none; margin: 0; padding: 18px 26px 12px; height: 100%; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; font-size: 13.5px; line-height: 1.55; text-align: left; }
+.ad-log li { flex: none; }
+.ad-log li.new { animation: line-in 0.4s var(--ease) both; }
+.ad-user { align-self: flex-end; max-width: 80%; padding: 7px 12px; border-radius: 12px 12px 4px 12px; background: var(--panel-3); }
+.ad-text b { font-weight: 600; }
+.ad-tool { font: 12px/1.5 var(--mono); color: var(--text-3); padding-left: 10px; border-left: 1px solid var(--line-2); margin-top: -4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ad-tool i { font-style: normal; color: var(--text); margin-right: 8px; }
+.ad-tool b { font-weight: 400; color: var(--text-2); }
+.ad-done { font-size: 12px; color: var(--text-3); }
+.ad-box { display: flex; align-items: center; gap: 2px; margin: 0 22px 18px; min-height: 46px; padding: 10px 10px 10px 14px; border: 1px solid var(--line-3); border-radius: 12px; font-size: 13.5px; text-align: left; }
+#ad-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#ad-text:empty::before { content: "Message kalypso"; color: var(--text-3); }
+.ad-caret { width: 1px; height: 16px; background: var(--text); flex: none; animation: caret 1s steps(2) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.ad-send { margin-left: auto; display: grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 8px; background: var(--panel-3); color: var(--text-2); font-size: 13px; }
+
+/* ---------- Hand off: four separate cards ---------- */
+.uses-grid { gap: 16px !important; border: 0 !important; }
+.use { border: 1px solid var(--line-2) !important; border-radius: 14px; background: var(--panel); transition: border-color 0.25s var(--ease), transform 0.3s var(--ease); }
+.use:hover { border-color: var(--line-3) !important; transform: translateY(-2px); }
+
+/* ---------- A bigger pecten ---------- */
+.hero-pecten .pecten { width: 165% !important; bottom: -8% !important; }
+
+/* ---------- Layers: on a field of dots, no box ---------- */
+.isle { border: 0 !important; background: none !important; border-radius: 0 !important; overflow: visible !important; position: relative; }
+.isle::before { content: ""; position: absolute; inset: -40px -24px -10px; z-index: -1; pointer-events: none;
+  background: radial-gradient(circle, rgb(var(--ink) / 0.16) 1px, transparent 1.6px) 0 0 / 14px 14px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 62% at 50% 52%, #000 30%, transparent 78%); mask-image: radial-gradient(ellipse 60% 62% at 50% 52%, #000 30%, transparent 78%); }
+.layers { isolation: isolate; }
+.stack-map .face, .stack-map .slab { fill: var(--bg) !important; }
+
+main > .layers { overflow-x: clip; }
