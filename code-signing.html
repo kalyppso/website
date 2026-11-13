@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Code signing policy · KALYPSO</title>
+  <meta name="description" content="How KALYPSO's releases are built and signed, who approves them, and what the app sends over the network.">
+  <meta name="color-scheme" content="dark light">
+  <script>try { var t = localStorage.getItem("theme"); } catch (e) {} document.documentElement.dataset.theme = t || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");</script>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .doc { max-width: 760px; margin: 0 auto; padding: 72px 24px 96px; }
+    .doc h1 { font-size: clamp(32px, 4vw, 44px); letter-spacing: -0.04em; line-height: 1.1; margin: 0 0 12px; }
+    .doc h2 { font-size: 22px; letter-spacing: -0.02em; margin: 48px 0 12px; }
+    .doc p, .doc li { color: var(--text-2); line-height: 1.65; }
+    .doc ul { padding-left: 20px; }
+    .doc a { color: var(--text); }
+    .doc .lede { font-size: 18px; }
+    .doc table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 15px; }
+    .doc th, .doc td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line-2); color: var(--text-2); vertical-align: top; }
+    .doc th { color: var(--text); font-weight: 500; }
+    .doc .credit { margin-top: 28px; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: 12px; color: var(--text-2); }
+    .back { display: inline-block; margin-bottom: 32px; color: var(--text-3); text-decoration: none; font-size: 14px; }
+    .back:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+  <main class="doc">
+    <a class="back" href="./">&larr; KALYPSO</a>
+    <h1>Code signing policy</h1>
+    <p class="lede">How KALYPSO's releases are built and signed, who approves them, and what the app sends over the network.</p>
+
+    <p class="credit">Windows releases: free code signing provided by <a href="https://signpath.io">SignPath.io</a>, certificate by <a href="https://signpath.org">SignPath Foundation</a> (application in review).</p>
+
+    <h2>What gets signed</h2>
+    <p>Only KALYPSO's own release files, built from the source code in <a href="https://github.com/kalyppso/kalypso">github.com/kalyppso/kalypso</a>: the Windows installers (<code>.exe</code> and <code>.msi</code>) and the application inside them. Every release is built by the project's <a href="https://github.com/kalyppso/kalypso/blob/main/.github/workflows/release.yml">release workflow</a> on GitHub-hosted runners, from a tagged commit on <code>main</code>. Nothing is signed from a developer's machine.</p>
+    <p>KALYPSO is open source under the <a href="https://github.com/kalyppso/kalypso/blob/main/LICENSE">MIT License</a>. Third-party libraries in the installers are open source and are not signed with the project's certificate.</p>
+
+    <h2>Team and roles</h2>
+    <table>
+      <tr><th>Role</th><th>Who</th><th>What they do</th></tr>
+      <tr><td>Committers</td><td><a href="https://github.com/chxmxii">@chxmxii</a></td><td>May merge changes to <code>main</code>.</td></tr>
+      <tr><td>Reviewers</td><td><a href="https://github.com/chxmxii">@chxmxii</a></td><td>Review every change from someone who is not a committer before it is merged, including changes to build scripts and CI.</td></tr>
+      <tr><td>Approvers</td><td><a href="https://github.com/chxmxii">@chxmxii</a></td><td>Approve each signing request by hand, after checking it comes from a release build.</td></tr>
+    </table>
+    <p>Everyone with access to the repository or to the signing service uses two-factor authentication.</p>
+
+    <h2>Privacy</h2>
+    <p>KALYPSO has no account, no analytics and no telemetry. It sends nothing over the network unless you ask it to, with one exception: the update check.</p>
+    <ul>
+      <li><b>Update check:</b> once, a few seconds after it starts, KALYPSO downloads the release manifest from GitHub (<code>github.com/kalyppso/kalypso/releases</code>) to see whether a newer version exists. GitHub sees your IP address, as with any download. Nothing about you or your work is sent.</li>
+      <li><b>Model calls:</b> your agents' requests go to the model provider you choose (for example Anthropic, OpenAI, or a local Ollama), with your key, through KALYPSO's gateway on your machine.</li>
+      <li><b>GitHub:</b> only if you connect a GitHub account. KALYPSO then uses it for the repositories you link, and checks every hour that the connection still works.</li>
+      <li><b>Sandbox images:</b> when you create a sandbox, your container engine downloads the agent runner image from <code>ghcr.io</code>.</li>
+      <li><b>Your agents:</b> what an agent reaches on the network is up to you, and is checked against your Rules.</li>
+    </ul>
+    <p>These services have their own privacy policies: <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub</a>, and the model provider you use.</p>
+
+    <h2>Uninstalling</h2>
+    <p>Windows: Settings, Apps, KALYPSO, Uninstall. macOS: move KALYPSO to the Trash. Linux: remove the AppImage, or <code>sudo apt remove kalypso</code> for the <code>.deb</code>.</p>
+  </main>
+</body>
+</html>
