@@ -582,3 +582,37 @@ main > .uses { padding-top: 104px; padding-bottom: 104px; }
 /* The active tab's bar fills as its time runs; it starts empty on every tab. */
 .show-tabs .bar::after { transform: scaleX(var(--p, 0)); }
 .show-tabs button[aria-selected="true"] { background: color-mix(in srgb, var(--text) 3%, transparent); }
+
+/* ---------- Behind Kalypso: the pecten, no glows ---------- */
+.hero::after, .portrait::before { display: none !important; }
+.portrait { position: relative; isolation: isolate; }
+.portrait .pecten { position: absolute; z-index: -1; left: 50%; bottom: 6%; width: 122%; height: auto; max-width: none; transform: translateX(-50%); opacity: 0.45; }
+.portrait canvas { position: relative; }
+@media (prefers-reduced-motion: no-preference) {
+  .portrait .pecten { animation: pecten-in 1.8s var(--ease) 0.4s both; transform-origin: 50% 100%; }
+}
+@keyframes pecten-in { from { opacity: 0; transform: translateX(-50%) scale(0.6, 0.2); } }
+.foot-sign { display: none; }
+
+/* ---------- The chat orb, above the Ask headline ---------- */
+.site-orb { display: block; width: 132px; height: 132px; margin: 0 0 22px -14px; color: var(--text); cursor: pointer; }
+
+/* ---------- Hand off: an even 2 x 2 grid ---------- */
+.uses-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.use, .use.wide { grid-column: auto !important; }
+.use-img { flex: none !important; aspect-ratio: 16 / 9; min-height: 0 !important; }
+.use-copy { flex: 1; }
+@media (max-width: 860px) { .uses-grid { grid-template-columns: 1fr !important; } }
+
+/* ---------- The pecten across the whole first section ---------- */
+.hero-pecten { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.hero-pecten .pecten { position: absolute; left: 50%; bottom: -1px; width: 118%; max-width: none; height: auto; transform: translateX(-50%); opacity: 0.24; }
+.hero { position: relative; isolation: isolate; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-pecten .pecten { animation: fan-open 2s var(--ease) 0.3s both; transform-origin: 50% 100%; }
+}
+@keyframes fan-open { from { opacity: 0; transform: translateX(-50%) scale(0.5, 0.15); } }
+[data-theme="light"] .hero-pecten .pecten { opacity: 0.3; }
+
+/* ---------- No leftover glows ---------- */
+main > .ask::after, main > .get::after { display: none !important; }
