@@ -684,3 +684,45 @@ main > .layers { overflow-x: clip; }
 @keyframes layer-pulse { 0%, 100% { stroke: rgb(var(--ink) / 0.22); } 9% { stroke: rgb(var(--ink) / 0.7); } 26% { stroke: rgb(var(--ink) / 0.22); } }
 @keyframes layer-rim { 0%, 100% { stroke: rgb(var(--ink) / 0.6); stroke-width: 1.1; } 9% { stroke: rgb(var(--ink)); stroke-width: 1.8; } 26% { stroke: rgb(var(--ink) / 0.6); stroke-width: 1.1; } }
 @keyframes layer-node { 0%, 100% { opacity: 0.7; } 9% { opacity: 1; } 26% { opacity: 0.7; } }
+
+/* ---------- Open page: no frame, no table lines; sections separated by space ---------- */
+:root, :root[data-theme="light"] { --col: 1280px; }
+.rails { display: none !important; }
+main > section + section { border-top: 0 !important; }
+main > section + section::before, main > section + section::after { display: none !important; }
+main > section { padding-left: 40px; padding-right: 40px; }
+.site-foot, .site-foot .footer, .foot-base { border-top: 0 !important; }
+.foot-base { color: var(--text-3); }
+/* Logos: a plain row, spaced out across the page. */
+.logos { display: flex !important; flex-wrap: wrap; justify-content: space-between; gap: 28px 40px !important; border: 0 !important; padding: 0 8px !important; }
+.logos li { height: auto; border: 0 !important; background: none !important; }
+.logos li:hover { background: none !important; }
+.logos svg { width: 24px; height: 24px; }
+/* Guarantees: open columns. */
+.three { gap: 56px; padding: 96px 40px !important; }
+.three article { padding: 0 !important; border: 0 !important; }
+/* The window and the tour sit a little wider than the text. */
+main > .stage { padding-left: 40px !important; padding-right: 40px !important; }
+.nav-inner, .footer, .foot-base { max-width: var(--col) !important; }
+.nav-inner { padding-left: 40px; padding-right: 40px; }
+@media (max-width: 860px) { .three { gap: 40px; padding: 64px 16px !important; } }
+@media (max-width: 640px) { main > section, main > .stage { padding-left: 16px !important; padding-right: 16px !important; } }
+/* The pecten spans the whole screen, edge to edge. */
+.hero { overflow: visible !important; }
+.hero-pecten { left: calc(50% - 50vw) !important; right: calc(50% - 50vw) !important; overflow: hidden; }
+.hero-pecten .pecten { width: min(150vw, 2100px) !important; opacity: 0.2 !important; }
+[data-theme="light"] .hero-pecten .pecten { opacity: 0.26 !important; }
+/* Downloads: three separate cards, not a list. */
+.oses { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; border: 0 !important; border-radius: 0 !important; overflow: visible !important; }
+.oses li { flex-direction: column; align-items: flex-start !important; gap: 14px !important; padding: 24px !important; border: 1px solid var(--line-2) !important; border-radius: 14px; background: var(--panel); }
+.oses li + li { border-top: 1px solid var(--line-2) !important; }
+.oses li .i { width: 26px !important; height: 26px !important; }
+.oses li div { flex: none !important; }
+.oses li.mine { border-color: var(--line-3) !important; }
+.oses li.mine b::after { display: block; margin: 4px 0 0; }
+.oses li a { margin-top: auto; }
+@media (max-width: 860px) { .oses { grid-template-columns: 1fr; } }
+.oses li { display: grid !important; grid-template-columns: repeat(3, max-content); grid-template-rows: auto auto 1fr; column-gap: 8px !important; row-gap: 14px !important; min-height: 210px; }
+.oses li > .i, .oses li > div { grid-column: 1 / -1; }
+.oses li > a { align-self: end; margin-top: 0 !important; }
+.oses li.mine b::after { display: inline; margin: 0 0 0 10px; }
