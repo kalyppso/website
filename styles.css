@@ -668,3 +668,19 @@ main > .ask::after, main > .get::after { display: none !important; }
 .stack-map .face, .stack-map .slab { fill: var(--bg) !important; }
 
 main > .layers { overflow-x: clip; }
+
+/* ---------- Layers: the stack assembles, a pulse rises through it, depth follows the cursor ---------- */
+/* --gap (scroll), --mx/--my (cursor, -1..1) and --d (0 sandbox ... 3 gateway) come from main.js. */
+.stack-map .plate { transform: translate(calc(var(--mx, 0) * (3 - var(--d, 0)) * 7px), calc(var(--gap, 0px) + var(--my, 0) * (3 - var(--d, 0)) * 4px + var(--lift, 0px))) !important;
+  transition: transform 0.6s var(--ease), opacity 0.35s !important; }
+.isle[data-on="sandbox"] [data-layer="sandbox"], .isle[data-on="policies"] [data-layer="policies"],
+.isle[data-on="vault"] [data-layer="vault"], .isle[data-on="gateway"] [data-layer="gateway"] { --lift: -16px; }
+.stack-map .leader, .stack-map .p-num, .stack-map .p-label, .stack-map .p-sub { opacity: var(--labels, 1); transition: opacity 0.6s var(--ease); }
+@media (prefers-reduced-motion: no-preference) {
+  .stack-map .plate .mesh { animation: layer-pulse 3.6s var(--ease) infinite; animation-delay: calc(var(--d, 0) * 0.32s); }
+  .stack-map .plate .rim { animation: layer-rim 3.6s var(--ease) infinite; animation-delay: calc(var(--d, 0) * 0.32s); }
+  .stack-map .plate .node { animation: layer-node 3.6s var(--ease) infinite; animation-delay: calc(var(--d, 0) * 0.32s); }
+}
+@keyframes layer-pulse { 0%, 100% { stroke: rgb(var(--ink) / 0.22); } 9% { stroke: rgb(var(--ink) / 0.7); } 26% { stroke: rgb(var(--ink) / 0.22); } }
+@keyframes layer-rim { 0%, 100% { stroke: rgb(var(--ink) / 0.6); stroke-width: 1.1; } 9% { stroke: rgb(var(--ink)); stroke-width: 1.8; } 26% { stroke: rgb(var(--ink) / 0.6); stroke-width: 1.1; } }
+@keyframes layer-node { 0%, 100% { opacity: 0.7; } 9% { opacity: 1; } 26% { opacity: 0.7; } }

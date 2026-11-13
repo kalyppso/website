@@ -643,3 +643,34 @@ function makeOrb(el, size) {
   new IntersectionObserver(([e]) => { inView = e.isIntersecting; check(); }, { threshold: 0.35 }).observe(panel.closest(".win"));
   new MutationObserver(check).observe(panel, { attributes: true, attributeFilter: ["class"] });
 })();
+
+/* ---------- Layers: assemble on scroll, depth under the cursor ---------- */
+(function layersMotion() {
+  const isle = $(".isle"), map = $("#isle");
+  if (!isle || !map) return;
+  const order = ["sandbox", "policies", "vault", "gateway"];
+  const plates = order.map((k) => map.querySelector(`[data-layer="${k}"]`)).filter(Boolean);
+  plates.forEach((p, k) => p.style.setProperty("--d", k));
+  if (reduce) return;
+  // Pressed together in the middle until the figure is in view, then spread into the stack.
+  // Plates sit ~100 units apart around the middle.
+  const mid = (plates.length - 1) / 2;
+  const spread = (s) => {
+    const k = 1 - s;
+    // CSS translations on SVG shapes are in the drawing's own units, so no scaling is needed.
+    plates.forEach((p, i) => p.style.setProperty("--gap", `${((i - mid) * 100 * 0.82 * k).toFixed(1)}px`));
+    map.style.setProperty("--labels", Math.max(0, (s - 0.55) / 0.45).toFixed(2));
+  };
+  spread(0);
+  const steps = Array.from({ length: 31 }, (_, i) => i / 30);
+  new IntersectionObserver(([e]) => spread(Math.min(1, e.intersectionRatio * 1.7)), { threshold: steps }).observe(map);
+  // Depth: each plate follows the cursor by a different amount.
+  if (matchMedia("(pointer: fine)").matches) {
+    isle.addEventListener("pointermove", (e) => {
+      const b = isle.getBoundingClientRect();
+      map.style.setProperty("--mx", (((e.clientX - b.left) / b.width) * 2 - 1).toFixed(3));
+      map.style.setProperty("--my", (((e.clientY - b.top) / b.height) * 2 - 1).toFixed(3));
+    });
+    isle.addEventListener("pointerleave", () => { map.style.setProperty("--mx", 0); map.style.setProperty("--my", 0); });
+  }
+})();
