@@ -341,7 +341,8 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
   if (!tabs.length) return;
   const row = $(".show-tabs");
   const panel = $("#show-panel");
-  // Tabs change only when you pick one: nothing moves on its own while you scroll.
+  // Tabs advance on their own every few seconds, only while the section is well in view and
+  // you aren't pointing at it; picking one jumps there and the timer starts over.
   const select = (i, focus = false) => {
     const current = (i + tabs.length) % tabs.length;
     const key = tabs[current].dataset.tab;
@@ -366,6 +367,34 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
     select(go, true);
   });
   select(0);
+
+  const DUR = 6000;
+  const show0 = $(".show");
+  let inView = false, hover = false, start = 0, raf = 0;
+  const bar = () => tabs.find((t) => t.getAttribute("aria-selected") === "true");
+  const tick = (now) => {
+    raf = 0;
+    if (!inView || hover || reduce) return;
+    if (!start) start = now;
+    const p = Math.min(1, (now - start) / DUR);
+    bar()?.style.setProperty("--p", p.toFixed(4));
+    if (p >= 1) {
+      const now_i = tabs.indexOf(bar());
+      tabs.forEach((t) => t.style.setProperty("--p", "0"));
+      select(now_i + 1);
+      start = now;
+    }
+    raf = requestAnimationFrame(tick);
+  };
+  const run = () => { if (!raf && inView && !hover && !reduce) { start = performance.now() - parseFloat(bar()?.style.getPropertyValue("--p") || "0") * DUR; raf = requestAnimationFrame(tick); } };
+  tabs.forEach((t) => t.addEventListener("click", () => { tabs.forEach((x) => x.style.setProperty("--p", "0")); start = performance.now(); }));
+  show0.addEventListener("pointerenter", () => { hover = true; });
+  show0.addEventListener("pointerleave", () => { hover = false; run(); });
+  show0.addEventListener("focusin", () => { hover = true; });
+  show0.addEventListener("focusout", () => { hover = false; run(); });
+  new IntersectionObserver(([e]) => { inView = e.intersectionRatio >= 0.55; if (inView) run(); }, { threshold: [0, 0.55, 1] }).observe(show0);
+  if (reduce) tabs.forEach((t) => t.style.setProperty("--p", "1"));
+
   // The screen settles flat once it's well in view.
   const show = $(".show");
   new IntersectionObserver(([e], io) => { if (e.isIntersecting) { show.classList.add("in"); io.disconnect(); } }, { threshold: 0.3 }).observe(show);

@@ -279,8 +279,10 @@
             <stop offset="0" stop-color="var(--g1)"/><stop offset="0.33" stop-color="var(--g2)"/><stop offset="0.66" stop-color="var(--g3)"/><stop offset="1" stop-color="var(--g4)"/>
             <animateTransform class="wm-sweep" attributeName="gradientTransform" type="translate" from="0 0" to="1200 0" dur="14s" repeatCount="indefinite"/>
           </linearGradient>
-          <linearGradient id="wfade" x1="0" y1="0" x2="0" y2="1"><stop offset="0.25" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-          <mask id="wmask"><rect width="1200" height="230" fill="url(#wfade)"/></mask>
+          <linearGradient id="wfade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="0.45" stop-color="#fff" stop-opacity="0.55"/><stop offset="0.92" stop-color="#fff" stop-opacity="0"/></linearGradient>
+          <linearGradient id="wsides" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset="0.12" stop-color="#fff"/><stop offset="0.88" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+          <mask id="wside"><rect width="1200" height="230" fill="url(#wsides)"/></mask>
+          <mask id="wmask"><rect width="1200" height="230" fill="url(#wfade)" mask="url(#wside)"/></mask>
         </defs>
         <g mask="url(#wmask)">
           <text class="wm-base" x="600" y="205" text-anchor="middle" textLength="1180" lengthAdjust="spacingAndGlyphs">KALYPSO</text>

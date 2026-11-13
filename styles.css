@@ -569,3 +569,16 @@ main > .uses { padding-top: 104px; padding-bottom: 104px; }
 
 /* The glows never widen the page. */
 .hero { overflow-x: clip; }
+
+/* ---------- The tab showcase: smoother changes ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .show-shot { transform: scale(1.025); filter: blur(6px); transition: opacity 0.7s var(--ease), transform 1.1s var(--ease), filter 0.7s var(--ease); }
+  .show-shot.on { transform: none; filter: none; }
+  .show-copy h3, .show-copy p { transform: translateY(14px); opacity: 0; transition: transform 0.7s var(--ease), opacity 0.7s var(--ease); }
+  .show-copy p { transition-delay: 0.08s; }
+  .show-copy.on h3, .show-copy.on p { transform: none; opacity: 1; }
+  .show-copy { transition: opacity 0.5s var(--ease); transform: none; }
+}
+/* The active tab's bar fills as its time runs; it starts empty on every tab. */
+.show-tabs .bar::after { transform: scaleX(var(--p, 0)); }
+.show-tabs button[aria-selected="true"] { background: color-mix(in srgb, var(--text) 3%, transparent); }
