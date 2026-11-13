@@ -726,3 +726,5 @@ main > .stage { padding-left: 40px !important; padding-right: 40px !important; }
 .oses li > .i, .oses li > div { grid-column: 1 / -1; }
 .oses li > a { align-self: end; margin-top: 0 !important; }
 .oses li.mine b::after { display: inline; margin: 0 0 0 10px; }
+.foot-base a { color: var(--text-2); text-decoration: none; }
+.foot-base a:hover { color: var(--text); }
