@@ -305,26 +305,6 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
     // A scanline every 8 seconds.
     const scan = reduce ? -1 : ((t - 2600) % 8000) / 1700;
     if (scan >= 0 && scan <= 1) lit(scan * H - 9, 18, 0.9);
-    // Nodes: where the mesh's lines meet.
-    ctx.fillStyle = `rgba(${ink},0.9)`;
-    ctx.beginPath();
-    for (const [x, y] of K.nodes) {
-      const [px, py] = place(x - cx0, y - cy0, depth(x, y), cyr, syr, cxr, sxr);
-      ctx.moveTo(px + 1.25, py); ctx.arc(px, py, 1.25, 0, 7);
-    }
-    ctx.fill();
-    // Stars come and go; eyes catch the light and look toward the cursor.
-    K.stars.forEach(([x, y], j) => {
-      const [px, py] = place(x - cx0, y - cy0, 0, cyr, syr, cxr, sxr);
-      const tw = 0.5 + 0.5 * Math.sin(now / 560 + j * 1.9);
-      ctx.fillStyle = `rgba(${ink},${(0.25 + 0.75 * tw).toFixed(2)})`;
-      ctx.beginPath(); ctx.arc(px, py, 1 + 1.4 * tw, 0, 7); ctx.fill();
-    });
-    ctx.fillStyle = `rgb(${ink})`;
-    K.eyes.forEach(([x, y]) => {
-      const [px, py] = place(x - cx0, y - cy0, depth(x, y), cyr, syr, cxr, sxr);
-      ctx.beginPath(); ctx.arc(px + rx * 2.5, py + ry * 1.5, 2.2, 0, 7); ctx.fill();
-    });
   };
 
   const loop = (now) => {
@@ -412,4 +392,108 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
     try { saved = localStorage.getItem("theme"); } catch (err) {}
     if (!saved) set(e.matches ? "light" : "dark", false);
   });
+})();
+
+/* The footer wordmark's gradient sweep (SMIL) holds still with reduced motion. */
+if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
+
+/* ---------- Scroll: arrivals and scroll-linked moments, without scroll listeners ---------- */
+(function scrollMotion() {
+  if (reduce) return;
+  // One-shot arrivals: headlines come into focus, grids stagger in.
+  const arrive = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); arrive.unobserve(e.target); }
+  }, { rootMargin: "0px 0px -12% 0px" });
+  $$("main h2").forEach((h) => arrive.observe(h));
+  $$(".three, .uses-grid, .logos").forEach((g) => {
+    g.classList.add("stagger");
+    [...g.children].forEach((c, i) => c.style.setProperty("--i", i));
+    arrive.observe(g);
+  });
+  // Scroll-linked: how far an element has come into view (0..1), from IntersectionObserver ratios.
+  const steps = Array.from({ length: 41 }, (_, i) => i / 40);
+  const track = (el, fn) => new IntersectionObserver(([e]) => fn(e), { threshold: steps }).observe(el);
+  // Where an element sits in the viewport: 0 entering at the bottom, 1 leaving at the top.
+  const pos = (e) => { const r = e.boundingClientRect, h = e.rootBounds?.height || innerHeight; return Math.min(1, Math.max(0, (h - r.top) / (h + r.height))); };
+  const shot = $(".ask-shot");
+  if (shot) track(shot, (e) => shot.style.setProperty("--tilt", Math.max(0, 1 - e.intersectionRatio * 1.6).toFixed(3)));
+  $$(".use-img").forEach((el) => track(el, (e) => el.style.setProperty("--py", pos(e).toFixed(3))));
+  const sign = $(".foot-sign");
+  if (sign) track(sign, (e) => sign.style.setProperty("--open", Math.min(1, e.intersectionRatio * 1.4).toFixed(3)));
+})();
+
+/* ---------- Mythic halftones: paintings from the Odyssey, redrawn as dots ---------- */
+(function halftones() {
+  const cards = $$("canvas[data-dots]");
+  if (!cards.length) return;
+  let rgb = [236, 236, 240], light = false;
+  const g = () => getComputedStyle(document.documentElement);
+  const hex = (h) => { h = h.trim().replace("#", ""); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); };
+  let grad = [];
+  const read = () => {
+    rgb = g().getPropertyValue("--ink").trim().split(/\s+/).map(Number);
+    light = document.documentElement.dataset.theme === "light";
+    grad = ["--g1", "--g2", "--g3", "--g4"].map((v) => hex(g().getPropertyValue(v)));
+  };
+  read();
+  const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  // Ink near the bottom-left, a hint of the gradient toward the top-right.
+  const tint = (u, v) => { const k = Math.min(1, Math.max(0, (u + (1 - v)) / 2)); return mix(rgb, grad[1], 0.35 * k); };
+
+  for (const cv of cards) {
+    const ctx = cv.getContext("2d");
+    const img = new Image();
+    let lum = null, lw = 0, lh = 0, mx = -1, my = -1, raf = 0, wave = 0;
+    img.onload = () => {
+      const o = document.createElement("canvas"); lw = o.width = img.naturalWidth; lh = o.height = img.naturalHeight;
+      const c = o.getContext("2d"); c.drawImage(img, 0, 0);
+      const d = c.getImageData(0, 0, lw, lh).data; lum = new Float32Array(lw * lh);
+      for (let i = 0; i < lw * lh; i++) lum[i] = Math.pow(d[i * 4] / 255, 0.75);
+      draw();
+    };
+    img.src = cv.dataset.dots;
+    const draw = () => {
+      raf = 0;
+      if (!lum) return;
+      const dpr = Math.min(2, devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
+      if (!W || !H) return;
+      if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      const step = W < 500 ? 6 : 7, r0 = step * 0.52;
+      // Cover-fit the painting into the card.
+      const sc = Math.max(W / lw, H / lh), ox = (W - lw * sc) / 2, oy = (H - lh * sc) / 2;
+      const py = parseFloat(cv.parentElement.style.getPropertyValue("--py") || "0.5");
+      for (let y = step / 2; y < H; y += step) {
+        for (let x = step / 2; x < W; x += step) {
+          const sx = Math.min(lw - 1, Math.max(0, Math.floor((x - ox) / sc))), sy = Math.min(lh - 1, Math.max(0, Math.floor((y - oy) / sc)));
+          // Light theme: dots are ink on paper, so they carry the painting's darkness.
+          let l = light ? 1 - lum[sy * lw + sx] * 0.92 : lum[sy * lw + sx];
+          // A slow light passes over the picture as you scroll; the cursor brightens what it touches.
+          l *= 0.82 + 0.3 * Math.exp(-(((y / H) - (1.2 - py * 1.4)) ** 2) * 9);
+          if (mx >= 0) { const d2 = (x - mx) ** 2 + (y - my) ** 2; l += 0.5 * Math.exp(-d2 / 2600); }
+          // Every cell keeps a faint dot, so the grid reads as one surface; light grows it.
+          const r = r0 * (0.16 + 0.84 * Math.min(1, l) ** 1.15);
+          const [cr, cg, cb] = tint(x / W, y / H);
+          ctx.fillStyle = `rgba(${cr},${cg},${cb},${(0.22 + 0.78 * Math.min(1, l)).toFixed(2)})`;
+          ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+        }
+      }
+    };
+    const ask = () => { if (!raf) raf = requestAnimationFrame(draw); };
+    new ResizeObserver(ask).observe(cv);
+    new MutationObserver(ask).observe(cv.parentElement, { attributes: true, attributeFilter: ["style"] });
+    if (!reduce) {
+      cv.addEventListener("pointermove", (e) => { const b = cv.getBoundingClientRect(); mx = e.clientX - b.left; my = e.clientY - b.top; ask(); });
+      cv.addEventListener("pointerleave", () => { mx = my = -1; ask(); });
+    }
+    addEventListener("themechange", () => { read(); ask(); });
+  }
+})();
+
+/* The tour plays only on screen, and not at all with reduced motion (its first frame stays). */
+(function tour() {
+  const v = $(".ask-shot video");
+  if (!v) return;
+  if (reduce) { v.removeAttribute("autoplay"); v.pause(); v.controls = true; return; }
+  new IntersectionObserver(([e]) => (e.isIntersecting ? v.play().catch(() => {}) : v.pause()), { threshold: 0.25 }).observe(v);
 })();
