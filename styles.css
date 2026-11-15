@@ -129,7 +129,7 @@ h1 em { font-style: italic; color: var(--accent-hi); padding-right: 0.05em; }
 .gh-line .i:last-child { width: 13px; height: 13px; }
 /* Kalypso, drawn in code: characters on a canvas (main.js). */
 .portrait { order: -1; margin: 0; width: clamp(300px, 36vw, 500px); user-select: none; }
-.portrait canvas { display: block; width: 100%; }
+.portrait canvas { display: block; width: 100%; touch-action: pan-y; }
 
 /* Tide lines: our own sea, drawn as thin contours either side of the headline. */
 @media (prefers-reduced-motion: no-preference) {

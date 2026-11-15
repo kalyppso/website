@@ -313,9 +313,17 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
     if (scan >= 0 && scan <= 1) lit(scan * H - 9, 18, 0.9);
   };
 
+  // Phones and tablets have no cursor: she sways on her own, follows a finger, and, where the
+  // browser allows it, follows the phone as it tilts. A finger or the tilt takes over from the sway.
+  let touching = false, tilted = 0;
   const loop = (now) => {
     raf = null;
     if (!visible) return;
+    if (!fine && !touching && now - tilted > 1500) {
+      const t = (now - t0) / 1000;
+      tx = Math.sin(t * 0.55) * 0.45 + Math.sin(t * 0.21) * 0.15;
+      ty = Math.sin(t * 0.37 + 1.3) * 0.22;
+    }
     rx += (tx - rx) * 0.08;
     ry += (ty - ry) * 0.08;
     if (now - last > (fine ? 16 : 33)) { draw(now); last = now; }
@@ -332,6 +340,39 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
       my = e.clientY - b.top;
     }, { passive: true });
     document.documentElement.addEventListener("pointerleave", () => { tx = ty = 0; mx = my = -1e5; });
+  }
+  if (!fine && !reduce) {
+    const follow = (e) => {
+      const b = cv.getBoundingClientRect();
+      tx = Math.max(-1, Math.min(1, (e.clientX - (b.left + b.width / 2)) / (b.width / 2)));
+      ty = Math.max(-1, Math.min(1, (e.clientY - (b.top + b.height * 0.42)) / (b.height / 2)));
+      mx = e.clientX - b.left;
+      my = e.clientY - b.top;
+    };
+    const release = () => { touching = false; mx = my = -1e5; };
+    cv.addEventListener("pointerdown", (e) => { touching = true; follow(e); askTilt(); }, { passive: true });
+    cv.addEventListener("pointermove", (e) => { if (touching) follow(e); }, { passive: true });
+    // Scrolling the page takes the finger over (pointercancel): she goes back to swaying.
+    for (const ev of ["pointerup", "pointercancel", "pointerleave"]) cv.addEventListener(ev, release, { passive: true });
+
+    const onTilt = (e) => {
+      if (e.gamma == null || e.beta == null || touching) return;
+      // Held upright-ish (beta about 45°): left and right turn her, forward and back tip her.
+      tx = Math.max(-1, Math.min(1, e.gamma / 30));
+      ty = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+      tilted = performance.now();
+    };
+    let asked = false;
+    // iPhones ask once, on a tap; Android sends the tilt without asking.
+    const askTilt = () => {
+      const D = window.DeviceOrientationEvent;
+      if (asked || !D || typeof D.requestPermission !== "function") return;
+      asked = true;
+      D.requestPermission().then((r) => { if (r === "granted") addEventListener("deviceorientation", onTilt, { passive: true }); }).catch(() => {});
+    };
+    if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission !== "function") {
+      addEventListener("deviceorientation", onTilt, { passive: true });
+    }
   }
   new ResizeObserver(() => { size(); if (reduce) draw(performance.now()); }).observe(fig);
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) start(); }).observe(cv);
