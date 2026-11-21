@@ -387,3 +387,4 @@ html.dk .ask-stage::before { content: ""; position: absolute; inset: 0; pointer-
 @media (max-width: 760px) { html.dk .ask-stage { height: 140vh; } }
 @media (prefers-reduced-motion: reduce) { html.dk .ask-stage { height: auto; } html.dk .ask-pin { position: static; height: auto; } }
 html.dk section.ask { overflow: visible; }
+html.dk .trust-sub { max-width: 60ch; margin: 18px 0 0; font-size: 18px; line-height: 1.55; color: rgba(255, 255, 255, 0.82); }
