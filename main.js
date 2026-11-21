@@ -573,7 +573,7 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
   const site = document.documentElement.classList.contains("dk");
   const PAL = [[0, [16, 16, 16]], [0.35, [62, 61, 58]], [0.62, [138, 135, 128]], [0.85, [212, 208, 199]], [1, [255, 253, 250]]];
   const white = () => document.documentElement.classList.contains("white");
-  const PALW = [[0, [228, 226, 220]], [0.45, [176, 172, 164]], [0.78, [78, 77, 74]], [1, [16, 16, 16]]];
+  const PALW = [[0, [228, 226, 220]], [0.45, [172, 180, 255]], [0.78, [75, 94, 252]], [1, [22, 24, 64]]];
   const palW = (l) => { l = Math.min(1, Math.max(0, l)); for (let i = 1; i < PALW.length; i++) if (l <= PALW[i][0]) { const [a, ca] = PALW[i - 1], [b, cb] = PALW[i]; return mix(ca, cb, (l - a) / (b - a)); } return PALW[PALW.length - 1][1]; };
   const pal = (l) => { l = Math.min(1, Math.max(0, l)); for (let i = 1; i < PAL.length; i++) if (l <= PAL[i][0]) { const [a, ca] = PAL[i - 1], [b, cb] = PAL[i]; return mix(ca, cb, (l - a) / (b - a)); } return PAL[PAL.length - 1][1]; };
 
