@@ -13,12 +13,13 @@
   <meta name="color-scheme" content="dark light">
   <script>/* Pick the theme before anything paints: your choice, else the system's. */
     try { var t = localStorage.getItem("theme"); } catch (e) {}
-    document.documentElement.dataset.theme = t || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");</script>
+    document.documentElement.dataset.theme = "light"; document.documentElement.classList.add("dk");</script>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="docker.css">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -30,6 +31,7 @@
       <span class="spacer"></span>
       <a class="nav-link" href="#ask">Product</a>
       <a class="nav-link" href="#layers">How it works</a>
+      <a class="nav-link" href="#download">Download</a>
       <a class="nav-link" href="#faq">FAQ</a>
       <a class="nav-link gh" href="https://github.com/kalyppso/kalypso"><svg class="i i-github-logo" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M208.31,75.68A59.78,59.78,0,0,0,202.93,28,8,8,0,0,0,196,24a59.75,59.75,0,0,0-48,24H124A59.75,59.75,0,0,0,76,24a8,8,0,0,0-6.93,4,59.78,59.78,0,0,0-5.38,47.68A58.14,58.14,0,0,0,56,104v8a56.06,56.06,0,0,0,48.44,55.47A39.8,39.8,0,0,0,96,192v8H72a24,24,0,0,1-24-24A40,40,0,0,0,8,136a8,8,0,0,0,0,16,24,24,0,0,1,24,24,40,40,0,0,0,40,40H96v16a8,8,0,0,0,16,0V192a24,24,0,0,1,48,0v40a8,8,0,0,0,16,0V192a39.8,39.8,0,0,0-8.44-24.53A56.06,56.06,0,0,0,216,112v-8A58.14,58.14,0,0,0,208.31,75.68ZM200,112a40,40,0,0,1-40,40H112a40,40,0,0,1-40-40v-8a41.74,41.74,0,0,1,6.9-22.48A8,8,0,0,0,80,73.83a43.81,43.81,0,0,1,.79-33.58,43.88,43.88,0,0,1,32.32,20.06A8,8,0,0,0,119.82,64h32.35a8,8,0,0,0,6.74-3.69,43.87,43.87,0,0,1,32.32-20.06A43.81,43.81,0,0,1,192,73.83a8.09,8.09,0,0,0,1,7.65A41.72,41.72,0,0,1,200,104Z"/></svg><span>GitHub</span><span class="stars" data-stars hidden></span></a>
       <button class="theme-btn" id="theme" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
@@ -39,7 +41,7 @@
 
   <main id="main">
     <!-- 1. One idea. -->
-    <section class="hero" id="top">
+    <section class="hero band-dark" id="top">
       <div class="hero-pecten" aria-hidden="true"><svg class="pecten hero-fan" viewBox="0 0 1200 620" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
         <defs>
           <linearGradient id="pg" x1="0" y1="0" x2="1" y2="0">
@@ -56,6 +58,7 @@
         </g>
       </svg></div>
       <div class="hero-copy">
+        <a class="pill" href="https://github.com/kalyppso/kalypso/releases"><b>NEW</b> Any AI provider, an egress proxy and Board tasks <span aria-hidden="true">&#8599;</span></a>
         <h1><span>Run AI agents safely,</span><br><span>on your own machine.</span></h1>
         <p class="lede">Each agent works in its own sandbox. KALYPSO checks every tool call against your rules, keeps your real keys out of reach and caps what it spends.</p>
   <div class="cta">
@@ -70,6 +73,7 @@
 
     <!-- 2. The product, live. -->
     <section class="stage" aria-label="KALYPSO, live">
+      <div class="stage-head"><span class="tag">See it work</span><h2>One app for your whole crew. <span>Click around: it replays real runs.</span></h2></div>
       <div class="win">
         <aside class="win-side">
           <div class="ws-ns"><img src="assets/mark.svg" alt="" width="20" height="20"><div><b>work</b><span>Client agents</span></div></div>
@@ -165,7 +169,8 @@
     <!-- Ask: one conversation that runs the others. -->
     <section class="ask" id="ask" aria-labelledby="ask-title">
       <div class="ask-copy">
-        <h2 id="ask-title">Ask once. <b>kalypso runs the crew.</b></h2>
+        <span class="tag">Meet kalypso</span>
+      <h2 id="ask-title">Ask once. <b>kalypso runs the crew.</b></h2>
         <p class="sub">Tell kalypso what you need. It plans the work, starts an agent for each part, runs them in parallel and reports back, with every step open to read.</p>
         <ul class="ask-points">
           <li><b>Plans and delegates.</b> Creates, starts and stops agents for you, inside your rules and budget.</li>
@@ -180,6 +185,7 @@
 
     <!-- What people hand off: four jobs, each with a photo. -->
     <section class="uses" aria-labelledby="uses-title">
+      <span class="tag">What you hand off</span>
       <h2 id="uses-title">What you can hand off.</h2>
       <p class="sub">The work you'd rather not babysit. kalypso splits it up, your crew does it, and you review the result.</p>
       <div class="uses-grid">
@@ -193,6 +199,7 @@
 
     <!-- How a call travels through KALYPSO, and each layer in the app. -->
     <section class="layers" id="layers" aria-labelledby="layers-title">
+      <span class="tag">How it works</span>
       <h2 id="layers-title">Every call goes through every layer.</h2>
       <p class="sub">From your agent to the model, KALYPSO is in the path, and it asks you before anything risky.</p>
       <div class="isle">
@@ -230,27 +237,37 @@
     </section>
 
     <!-- 3. Three guarantees. -->
-    <section class="three" aria-label="What KALYPSO guarantees">
+    <section class="trust band-vivid" aria-labelledby="trust-title">
+      <span class="tag light">Why KALYPSO</span>
+      <h2 id="trust-title">Give agents work. <span>Not your keys.</span></h2>
+    <div class="three" aria-label="What KALYPSO guarantees">
       <article>
         <span class="g-icon"><svg class="i i-key" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M216.57,39.43A80,80,0,0,0,83.91,120.78L28.69,176A15.86,15.86,0,0,0,24,187.31V216a16,16,0,0,0,16,16H72a8,8,0,0,0,8-8V208H96a8,8,0,0,0,8-8V184h16a8,8,0,0,0,5.66-2.34l9.56-9.57A79.73,79.73,0,0,0,160,176h.1A80,80,0,0,0,216.57,39.43ZM224,98.1c-1.09,34.09-29.75,61.86-63.89,61.9H160a63.7,63.7,0,0,1-23.65-4.51,8,8,0,0,0-8.84,1.68L116.69,168H96a8,8,0,0,0-8,8v16H72a8,8,0,0,0-8,8v16H40V187.31l58.83-58.82a8,8,0,0,0,1.68-8.84A63.72,63.72,0,0,1,96,95.92c0-34.14,27.81-62.8,61.9-63.89A64,64,0,0,1,224,98.1ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"/></svg></span>
+        <b class="stat">0</b><span class="stat-cap">real keys inside a sandbox</span>
         <h2>Secrets stay put.</h2>
         <p>Keys live encrypted on your machine. Agents get a revocable stand-in, and approved commands get the real thing without the agent ever seeing it.</p>
       </article>
       <article>
         <span class="g-icon"><svg class="i i-shield-check" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/></svg></span>
+        <b class="stat">100%</b><span class="stat-cap">of tool calls checked first</span>
         <h2>Every call is checked.</h2>
         <p>Rules in plain words run before each tool call. Risky ones wait for you. If KALYPSO can't answer, the answer is no.</p>
       </article>
       <article>
         <span class="g-icon"><svg class="i i-wallet" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M216,64H56a8,8,0,0,1,0-16H192a8,8,0,0,0,0-16H56A24,24,0,0,0,32,56V184a24,24,0,0,0,24,24H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64Zm0,128H56a8,8,0,0,1-8-8V78.63A23.84,23.84,0,0,0,56,80H216Zm-48-60a12,12,0,1,1,12,12A12,12,0,0,1,168,132Z"/></svg></span>
+        <b class="stat">$0</b><span class="stat-cap">spent past your cap</span>
         <h2>Spend has a ceiling.</h2>
         <p>Every token is metered at the gateway. At the cap, calls stop before they reach the provider.</p>
       </article>
+    </div>
     </section>
 
+    <div class="ticker" aria-hidden="true"><div class="ticker-row"><span>Sandboxed agents</span><i>&#9675;</i><span>Rules on every call</span><i>&#9675;</i><span>Keys stay in the vault</span><i>&#9675;</i><span>Spend capped</span><i>&#9675;</i><span>Any AI provider</span><i>&#9675;</i><span>Runs on your machine</span><i>&#9675;</i><span>Open source</span><i>&#9675;</i><span>Sandboxed agents</span><i>&#9675;</i><span>Rules on every call</span><i>&#9675;</i><span>Keys stay in the vault</span><i>&#9675;</i><span>Spend capped</span><i>&#9675;</i><span>Any AI provider</span><i>&#9675;</i><span>Runs on your machine</span><i>&#9675;</i><span>Open source</span><i>&#9675;</i></div></div>
+
     <!-- 4. Open source, and the download. -->
-    <section class="get" id="download" aria-labelledby="get-title">
-      <h2 id="get-title">Free. Open source. Yours.</h2>
+    <section class="get band-dark" id="download" aria-labelledby="get-title">
+      <span class="tag dark">Download</span>
+      <h2 id="get-title">Free. Open source. <span>Yours.</span></h2>
       <p class="sub" id="release-line">No account, no telemetry. Needs Docker or Podman.</p>
       <ul class="oses">
         <li data-os="mac"><svg class="i i-apple-logo" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M223.3,169.59a8.07,8.07,0,0,0-2.8-3.4C203.53,154.53,200,134.64,200,120c0-17.67,13.47-33.06,21.5-40.67a8,8,0,0,0,0-11.62C208.82,55.74,187.82,48,168,48a72.2,72.2,0,0,0-40,12.13,71.56,71.56,0,0,0-90.71,9.09A74.63,74.63,0,0,0,16,123.4a127.06,127.06,0,0,0,40.14,89.73A39.8,39.8,0,0,0,83.59,224h87.68a39.84,39.84,0,0,0,29.12-12.57,125,125,0,0,0,17.82-24.6C225.23,174,224.33,172,223.3,169.59Zm-34.63,30.94a23.76,23.76,0,0,1-17.4,7.47H83.59a23.82,23.82,0,0,1-16.44-6.51A111.14,111.14,0,0,1,32,123,58.5,58.5,0,0,1,48.65,80.47,54.81,54.81,0,0,1,88,64h.78A55.45,55.45,0,0,1,123,76.28a8,8,0,0,0,10,0A55.44,55.44,0,0,1,168,64a70.64,70.64,0,0,1,36,10.35c-13,14.52-20,30.47-20,45.65,0,23.77,7.64,42.73,22.18,55.3A105.82,105.82,0,0,1,188.67,200.53ZM128.23,30A40,40,0,0,1,167,0h1a8,8,0,0,1,0,16h-1a24,24,0,0,0-23.24,18,8,8,0,1,1-15.5-4Z"/></svg><div><b>macOS</b><span id="mac-arch">Apple silicon and Intel</span></div><a data-asset="dmg" href="https://github.com/kalyppso/kalypso/releases/latest">.dmg</a></li>
@@ -262,6 +279,7 @@
 
     <!-- 5. Five questions. -->
     <section class="faq" id="faq" aria-labelledby="faq-title">
+      <span class="tag">Questions</span>
       <h2 id="faq-title">Questions</h2>
       <div class="qa">
         <details><summary>Which models?</summary><p>Claude through the Anthropic API, and any OpenAI-compatible endpoint, including local ones like Ollama.</p></details>
@@ -271,9 +289,16 @@
         <details><summary>Windows warns about the installer.</summary><p>Early builds aren't signed yet: More info, then Run anyway.</p></details>
       </div>
     </section>
+    <section class="closer" aria-labelledby="closer-title">
+      <h2 id="closer-title">Run agents safely.</h2>
+      <div>
+        <p>Free to start, on your own machine. KALYPSO keeps every agent in its sandbox, checks every call and caps the spend, so you can hand off real work.</p>
+        <div class="cta"><a class="btn primary" href="#download" data-dl>Download</a><a class="btn" href="https://github.com/kalyppso/kalypso">Star on GitHub</a></div>
+      </div>
+    </section>
   </main>
 
-  <footer class="site-foot">
+  <footer class="site-foot band-dark">
     <div class="footer">
       <div class="foot-brand">
         <a class="brand" href="#top"><img src="assets/mark.svg" alt="" width="24" height="24"><span>KALYPSO</span></a>
@@ -304,5 +329,14 @@
   </footer>
 
   <script src="main.js" defer></script>
+  <script>/* The floating bar turns dark over the dark bands, like the reference. */
+    (function () {
+      var bands = document.querySelectorAll(".band-dark"), on = new Set();
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { e.isIntersecting ? on.add(e.target) : on.delete(e.target); });
+        document.documentElement.classList.toggle("nav-dark", on.size > 0);
+      }, { rootMargin: "-12px 0px -92% 0px" });
+      bands.forEach(function (b) { io.observe(b); });
+    })();</script>
 </body>
 </html>

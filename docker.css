@@ -1,0 +1,186 @@
+/* KALYPSO site, mock: the layout language of docker.com on our own content.
+   A warm paper page, dark bands with rounded corners, one vivid band, regular-weight two-tone
+   headlines, small outlined mono labels, hairline card grids. Loaded after styles.css. */
+
+html.dk {
+  --paper: #fffdfa;
+  --paper-2: #f4f2ed;
+  --night: #101010;
+  --night-2: #1a1a1a;
+  --vivid: #4b5efc;
+  --vivid-2: #6274ff;
+  --body: #4a4c55;
+  --hair: #e6e2da;
+  --radius-band: 44px;
+  --col: 1344px;
+  --bg: var(--paper);
+  --text: #101010;
+  --text-2: var(--body);
+  --text-3: #75777f;
+  --line: var(--hair);
+  --line-2: var(--hair);
+  --accent: #101010;
+  --accent-fg: #fffdfa;
+}
+html.dk body { background: var(--paper); color: var(--text); font-size: 16px; letter-spacing: -0.005em; }
+html.dk .rails { display: none; }
+
+/* The dark bands carry the dark theme's own colours, so what sits in them (Kalypso, the
+   download cards) draws as it does on the dark site. */
+html.dk .band-dark {
+  --bg: var(--night); --panel: #161616; --panel-2: #1c1c1c; --panel-3: #232323;
+  --line: #2a2a2a; --line-2: #2f2f2f; --line-3: #3a3a3a;
+  --text: #fffdfa; --text-2: #b4b4b8; --text-3: #85858c;
+  --accent: #fffdfa; --accent-fg: #101010; --ink: 236 236 240;
+  --g1: #ffffff; --g2: #9a9aa3; --g3: #dddedf; --g4: #5e5e66;
+  background: var(--night); color: var(--text); color-scheme: dark;
+}
+
+/* ---------- Type ---------- */
+html.dk h1, html.dk h2, html.dk h3 { font-weight: 400; letter-spacing: -0.035em; color: var(--text); }
+html.dk h2 { font-size: clamp(32px, 3.4vw, 46px); line-height: 1.08; margin: 0 0 16px; }
+html.dk h2 span, html.dk h2 b { font-weight: 400; color: var(--text-3); }
+html.dk .sub, html.dk .lede { color: var(--text-2); font-size: 18px; line-height: 1.55; max-width: 60ch; }
+html.dk .tag {
+  display: inline-block; margin: 0 0 18px; padding: 3px 7px; border: 1px solid currentColor; border-radius: 4px;
+  font: 500 11.5px/1.2 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text);
+}
+html.dk .tag.light, html.dk .tag.dark { color: var(--text); }
+
+/* ---------- Navigation: a floating bar ---------- */
+html.dk .nav { position: fixed; top: 12px; left: 0; right: 0; z-index: 50; background: none; border: 0; backdrop-filter: none; pointer-events: none; }
+html.dk .nav-inner {
+  pointer-events: auto; max-width: var(--col); margin: 0 auto; width: calc(100% - 96px); height: 56px; padding: 0 8px 0 16px;
+  border: 1px solid var(--hair); border-radius: 12px; background: rgba(255, 253, 250, 0.86); backdrop-filter: blur(14px);
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+html.dk.nav-dark .nav-inner { background: rgba(22, 22, 22, 0.78); border-color: #2c2c2c; color: #fffdfa; }
+html.dk.nav-dark .nav-inner .brand img { filter: none; }
+html.dk .nav-link { font-size: 14.5px; color: inherit; opacity: 0.92; }
+html.dk .theme-btn { display: none; }
+html.dk .nav .btn.sm { height: 36px; padding: 0 14px; border-radius: 6px; background: var(--vivid); border-color: var(--vivid); color: #fff; font-size: 14.5px; }
+html.dk .nav .gh { height: 36px; padding: 0 12px; border: 1px solid currentColor; border-radius: 6px; opacity: 1; }
+
+/* ---------- Buttons ---------- */
+html.dk .btn { border-radius: 6px; height: 44px; padding: 0 18px; font-size: 15px; font-weight: 400; }
+html.dk .btn.primary { background: var(--vivid); border-color: var(--vivid); color: #fff; }
+html.dk .btn.primary:hover { background: var(--vivid-2); border-color: var(--vivid-2); }
+html.dk .btn:not(.primary) { background: transparent; border: 1px solid currentColor; color: var(--text); }
+
+/* ---------- Hero: the dark band with rounded bottom corners ---------- */
+html.dk .hero {
+  max-width: none; margin: 0; padding: 150px max(48px, calc((100% - var(--col)) / 2)) 72px;
+  border-radius: 0 0 var(--radius-band) var(--radius-band);
+  display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 32px; align-items: center; overflow: hidden;
+}
+html.dk .hero-copy { order: 1; text-align: left; max-width: none; }
+html.dk .hero .portrait { order: 2; width: min(100%, 470px); justify-self: end; margin: 0; }
+html.dk .hero h1 { font-size: clamp(46px, 6vw, 84px); line-height: 1.02; margin: 18px 0 26px; }
+html.dk .hero h1 span:last-child { color: #8e8e95; }
+html.dk .hero .lede { font-size: 19px; max-width: 46ch; margin: 0 0 30px; }
+html.dk .hero .cta { justify-content: flex-start; }
+html.dk .hero .btn:not(.primary) { color: #fffdfa; }
+html.dk .hero-pecten .pecten { opacity: 0.12; }
+html.dk .pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px 4px 6px; border: 1px solid #3a3a3a; border-radius: 6px;
+  font-size: 13px; color: #e8e8ea; text-decoration: none;
+}
+html.dk .pill b { padding: 1px 5px; border-radius: 3px; background: #2a1d17; color: #ff7a4d; font: 600 10.5px/1.4 var(--mono); letter-spacing: 0.05em; }
+html.dk .pill:hover { border-color: #5a5a5a; }
+
+/* ---------- Sections on the paper ---------- */
+html.dk main > section:not(.hero):not(.band-dark):not(.band-vivid):not(.closer) { max-width: var(--col); width: calc(100% - 96px); margin: 0 auto; padding: 120px 0 0; }
+html.dk .stage-head { margin: 0 0 32px; max-width: 760px; }
+html.dk .stage .win { border-radius: 16px; border: 1px solid var(--hair); box-shadow: 0 30px 80px -40px rgba(30, 28, 24, 0.35); }
+
+/* Hand-off cards: one hairline grid, like the reference's three cards. */
+html.dk .uses-grid { gap: 0; border: 1px solid var(--hair); }
+html.dk .use { border: 0; border-radius: 0; background: transparent; padding: 28px; }
+html.dk .use + .use { border-left: 1px solid var(--hair); }
+html.dk .use h3 { font-size: 24px; margin: 18px 0 8px; }
+
+/* How it works: the list on the left, the app in a dark rounded panel on the right. */
+html.dk .show-main { background: var(--night); border-radius: 24px; padding: 28px; }
+html.dk .show-tabs button { color: #9a9aa0; }
+html.dk .show-tabs button[aria-selected="true"] { color: #fffdfa; }
+html.dk .show-copy { border-top: 1px solid var(--hair); padding: 18px 0; }
+html.dk .show-copy h3 { font-size: 24px; }
+
+/* ---------- The vivid band: the three guarantees as big stat cards ---------- */
+html.dk .band-vivid {
+  --text: #ffffff; --text-2: rgba(255, 255, 255, 0.82); --text-3: rgba(255, 255, 255, 0.62);
+  margin: 120px 0 0; padding: 110px max(48px, calc((100% - var(--col)) / 2)); background: var(--vivid); color: #fff;
+  border-radius: var(--radius-band);
+}
+html.dk .band-vivid .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 48px; max-width: none; padding: 0; border: 0; }
+html.dk .band-vivid .three article { background: rgba(255, 255, 255, 0.1); border: 0; border-radius: 16px; padding: 30px 28px 34px; display: flex; flex-direction: column; }
+html.dk .band-vivid .g-icon { display: none; }
+html.dk .stat { font-weight: 300; font-size: clamp(64px, 7vw, 104px); line-height: 1; letter-spacing: -0.05em; color: #fff; }
+html.dk .stat-cap { margin: 14px 0 40px; font: 12px/1.4 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255, 255, 255, 0.82); }
+html.dk .band-vivid .three h2 { font-size: 24px; color: #fff; margin: auto 0 8px; }
+html.dk .band-vivid .three p { color: rgba(255, 255, 255, 0.82); margin: 0; }
+
+/* A ticker band, like the reference's "Run on trust". */
+html.dk .ticker { overflow: hidden; border-block: 1px solid var(--hair); margin: 120px 0 0; padding: 18px 0; }
+html.dk .ticker-row { display: flex; gap: 28px; width: max-content; font: 13px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); animation: tick 40s linear infinite; }
+html.dk .ticker-row i { color: var(--vivid); font-style: normal; }
+@keyframes tick { to { transform: translateX(-50%); } }
+
+/* ---------- Download: a dark band ---------- */
+html.dk .get.band-dark { margin: 120px 0 0; padding: 110px max(48px, calc((100% - var(--col)) / 2)); border-radius: var(--radius-band); text-align: left; max-width: none; }
+html.dk .get h2, html.dk .get .sub { text-align: left; margin-left: 0; }
+html.dk .get .oses { margin: 40px 0 0; max-width: none; }
+html.dk .get .oses li { border-radius: 12px; }
+html.dk .get .fine { text-align: left; }
+
+/* ---------- FAQ: hairline rows ---------- */
+html.dk .faq details { border-bottom: 1px solid var(--hair); }
+
+/* ---------- Closing call to action: warm grey ---------- */
+html.dk .closer {
+  margin: 120px 0 0; padding: 110px max(48px, calc((100% - var(--col)) / 2)); background: var(--paper-2);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+}
+html.dk .closer h2 { font-size: clamp(48px, 6.5vw, 92px); margin: 0; letter-spacing: -0.05em; }
+html.dk .closer p { color: var(--body); font-size: 18px; margin: 0 0 22px; max-width: 46ch; }
+html.dk .closer .cta { justify-content: flex-start; }
+
+/* ---------- Footer: dark ---------- */
+html.dk .site-foot { margin: 0; padding: 72px max(48px, calc((100% - var(--col)) / 2)) 40px; border-top: 0; }
+html.dk .site-foot .brand img { filter: none; }
+html.dk .site-foot .foot-cta { background: var(--vivid); border-color: var(--vivid); color: #fff; }
+
+/* ---------- Small screens ---------- */
+@media (max-width: 900px) {
+  html.dk .nav-inner { width: calc(100% - 24px); }
+  html.dk .hero { grid-template-columns: 1fr; padding: 112px 20px 48px; border-radius: 0 0 28px 28px; }
+  html.dk .hero .portrait { order: 0; justify-self: center; width: min(360px, 82vw); }
+  html.dk .hero h1 { font-size: clamp(34px, 10.5vw, 46px); }
+  html.dk .hero h1 span { white-space: normal !important; display: inline; }
+  html.dk .nav-link:not(.gh) { display: none; }
+  html.dk .nav-inner { gap: 8px; padding: 0 8px 0 12px; }
+  html.dk main > section:not(.hero):not(.band-dark):not(.band-vivid):not(.closer) { width: calc(100% - 32px); padding-top: 84px; }
+  html.dk .band-vivid, html.dk .get.band-dark, html.dk .closer { padding: 80px 20px; border-radius: 28px; }
+  html.dk .band-vivid .three, html.dk .closer { grid-template-columns: 1fr; }
+  html.dk .use + .use { border-left: 0; border-top: 1px solid var(--hair); }
+}
+@media (prefers-reduced-motion: reduce) { html.dk .ticker-row { animation: none; } }
+
+/* ---------- Fixes after the first look ---------- */
+/* Bands are full width: the old section width and padding don't apply to them. */
+html.dk main > section.band-vivid, html.dk main > section.band-dark, html.dk main > section.closer {
+  max-width: none !important; width: 100% !important; margin-left: 0; margin-right: 0;
+}
+html.dk main > section + section { border-top: 0; }
+/* The stat cards: their own padding, content inside them. */
+html.dk .band-vivid .three { padding: 0 !important; }
+html.dk .band-vivid .three article { padding: 30px 28px 34px !important; height: auto; min-height: 340px; }
+html.dk .band-vivid .three article + article { border-left: 0; }
+/* The app in the dark panel: its dark screenshots, and plain tabs with a thin underline. */
+html.dk .show-main .show-shot .dk { display: block; }
+html.dk .show-main .show-shot .lt { display: none; }
+html.dk .show-main { --line-2: #2f2f2f; --panel: #161616; --text: #fffdfa; --text-2: #b4b4b8; --bg: #101010; }
+html.dk .show-tabs { gap: 22px; border-bottom: 1px solid #2a2a2a; margin-bottom: 20px; }
+html.dk .show-tabs button { border: 0 !important; background: none !important; padding: 10px 0 12px; border-radius: 0; font: 12px var(--mono); letter-spacing: 0.08em; }
+html.dk .show-tabs .bar { left: 0; right: 0; top: auto; bottom: -1px; height: 1px; }
+html.dk .show-frame { border-color: #2a2a2a; background: #161616; }

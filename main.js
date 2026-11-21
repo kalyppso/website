@@ -233,7 +233,7 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
   const fine = matchMedia("(pointer: fine)").matches;
   // She is drawn in the theme's ink: near-white on the dark theme, near-black on the white one.
   let ink = "236,236,240";
-  const readInk = () => { ink = getComputedStyle(document.documentElement).getPropertyValue("--ink").trim().split(/\s+/).join(","); };
+  const readInk = () => { ink = getComputedStyle(cv).getPropertyValue("--ink").trim().split(/\s+/).join(","); };
   readInk();
   addEventListener("themechange", () => { readInk(); if (reduce) draw(performance.now()); });
 
