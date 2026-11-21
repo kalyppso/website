@@ -20,7 +20,7 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="docker.css?v=11">
+  <link rel="stylesheet" href="docker.css?v=12">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -30,14 +30,17 @@
     <div class="nav-inner">
       <a class="brand" href="#top" aria-label="KALYPSO home"><img src="assets/mark.svg" alt="" width="30" height="30"><span>KALYPSO</span></a>
       <span class="spacer"></span>
-      <a class="nav-link" href="#ask">Product</a>
+      <div class="nav-menu"><button class="nav-link nav-drop" type="button" aria-expanded="false" aria-controls="mega">Product</button>
+      </div>
       <a class="nav-link" href="#layers">How it works</a>
       <a class="nav-link" href="#download">Download</a>
       <a class="nav-link" href="#faq">FAQ</a>
+      <a class="nav-link" href="blog/">Blog</a>
       <a class="nav-link gh" href="https://github.com/kalyppso/kalypso"><svg class="i i-github-logo" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M208.31,75.68A59.78,59.78,0,0,0,202.93,28,8,8,0,0,0,196,24a59.75,59.75,0,0,0-48,24H124A59.75,59.75,0,0,0,76,24a8,8,0,0,0-6.93,4,59.78,59.78,0,0,0-5.38,47.68A58.14,58.14,0,0,0,56,104v8a56.06,56.06,0,0,0,48.44,55.47A39.8,39.8,0,0,0,96,192v8H72a24,24,0,0,1-24-24A40,40,0,0,0,8,136a8,8,0,0,0,0,16,24,24,0,0,1,24,24,40,40,0,0,0,40,40H96v16a8,8,0,0,0,16,0V192a24,24,0,0,1,48,0v40a8,8,0,0,0,16,0V192a39.8,39.8,0,0,0-8.44-24.53A56.06,56.06,0,0,0,216,112v-8A58.14,58.14,0,0,0,208.31,75.68ZM200,112a40,40,0,0,1-40,40H112a40,40,0,0,1-40-40v-8a41.74,41.74,0,0,1,6.9-22.48A8,8,0,0,0,80,73.83a43.81,43.81,0,0,1,.79-33.58,43.88,43.88,0,0,1,32.32,20.06A8,8,0,0,0,119.82,64h32.35a8,8,0,0,0,6.74-3.69,43.87,43.87,0,0,1,32.32-20.06A43.81,43.81,0,0,1,192,73.83a8.09,8.09,0,0,0,1,7.65A41.72,41.72,0,0,1,200,104Z"/></svg><span>GitHub</span><span class="stars" data-stars hidden></span></a>
       <button class="theme-btn" id="theme" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
       <a class="btn sm" href="#download" data-dl>Download</a>
     </div>
+    <div class="mega" id="mega" hidden><div class="mega-col"><p>PRODUCT</p><a href="#ask"><b>kalypso</b><span>Ask once; it plans the work and runs the crew</span></a><a href="#live"><b>Crew</b><span>Agents, each in its own sandbox</span></a><a href="#live"><b>Board <i>NEW</i></b><span>Hand out work as tasks and follow it</span></a><a href="#live"><b>Toolkit <i>NEW</i></b><span>MCP servers and skills for any agent</span></a></div><div class="mega-col"><p>CONTROL</p><a href="#trace"><b>Rules</b><span>Plain-language checks on every tool call</span></a><a href="#trace"><b>Vault</b><span>Keys stay encrypted; agents get stand-ins</span></a><a href="#layers"><b>Spend</b><span>Every token metered, with hard caps</span></a><a href="#trace"><b>Egress proxy <i>NEW</i></b><span>Each sandbox's traffic follows your rules</span></a></div><div class="mega-col"><p>MODELS</p><a href="#faq"><b>Any AI provider <i>NEW</i></b><span>Claude, OpenAI-compatible and local models</span></a><a href="#faq"><b>Local models</b><span>Ollama, LM Studio and vLLM, on your machine</span></a></div></div>
   </header>
 
   <main id="main">
@@ -116,9 +119,22 @@
           <li><b>Any model.</b> Claude, or any OpenAI-compatible model, local ones included.</li>
         </ul>
       </div>
-      <figure class="ask-shot">
+      <figure class="ask-shot mac">
+        <div class="mac-bar" aria-hidden="true"><span class="mac-lights"><i></i><i></i><i></i></span><span class="mac-title">KALYPSO</span></div>
         <video src="assets/tour.mp4" poster="assets/tour-poster.webp" width="1600" height="1000" autoplay muted loop playsinline preload="metadata" aria-label="A tour of KALYPSO: kalypso splits a request between two agents, then a crew member's conversation, a new chat, the Playbook, Rules and Spend"></video>
       </figure>
+    </section>
+
+    <section class="openrow" aria-labelledby="openrow-title">
+      <p id="openrow-title">Open by design</p>
+      <ul>
+        <li class="o-bold">MIT License</li>
+        <li class="o-serif"><em>Runs on your machine</em></li>
+        <li class="o-mono">macOS · Windows · Linux</li>
+        <li class="o-mono">Docker · Podman</li>
+        <li class="o-bold">No account</li>
+        <li class="o-serif">Local models welcome</li>
+      </ul>
     </section>
 
     <!-- What people hand off: four jobs, each with a photo. -->
@@ -265,11 +281,14 @@
       <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is KALYPSO?", "acceptedAnswer": {"@type": "Answer", "text": "A desktop app that runs a crew of AI agents on your own machine. You tell kalypso what you need; it plans the work and hands each part to an agent. Every agent works in its own sandbox, behind your rules, without your real keys, inside a budget you set."}}, {"@type": "Question", "name": "What do I need to run it?", "acceptedAnswer": {"@type": "Answer", "text": "macOS, Windows or Linux, and Docker or Podman for the sandboxes. Then a model: an API key from a provider, or a local model through Ollama."}}, {"@type": "Question", "name": "Is it free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It's open source under the MIT License, with no account and no subscription. You pay your model provider for what your agents use, or nothing at all with a local model."}}, {"@type": "Question", "name": "Which models can I use?", "acceptedAnswer": {"@type": "Answer", "text": "Claude, through the Anthropic API, and any OpenAI-compatible provider: OpenAI, OpenRouter, Groq, Mistral and others. Local models through Ollama work too. Any other provider can be added by its base URL."}}, {"@type": "Question", "name": "Can an agent see my API keys?", "acceptedAnswer": {"@type": "Answer", "text": "No. Your model keys stay encrypted in the Vault and are added at the gateway, on the way out. Agents only hold a stand-in kx_ key that works nowhere else and can be revoked at any time."}}, {"@type": "Question", "name": "What about secrets an agent needs, like a GitHub token?", "acceptedAnswer": {"@type": "Answer", "text": "Give them to the agents that need them, from the Vault or the agent's page. They arrive as files in /run/kalypso/secrets, never in a prompt, and the gateway strips them out of any request to a model."}}, {"@type": "Question", "name": "What can an agent touch on my computer?", "acceptedAnswer": {"@type": "Answer", "text": "Only its sandbox: a read-only container with no privileges and its own network, plus the work folder you give it. Anything it sends out goes through an egress proxy that follows your rules."}}, {"@type": "Question", "name": "How do rules work?", "acceptedAnswer": {"@type": "Answer", "text": "Write them in plain words, like “No force-push to main” or “Ask before unknown hosts”, and choose what happens: block it, ask me, or warn. Every tool call is checked before it runs, and “ask me” waits for your answer."}}, {"@type": "Question", "name": "Does my code leave my machine?", "acceptedAnswer": {"@type": "Answer", "text": "Only inside the requests your agents send to the model provider you chose. There is no KALYPSO cloud. With a local model, your code and prompts stay on your machine."}}, {"@type": "Question", "name": "How do I keep spending under control?", "acceptedAnswer": {"@type": "Answer", "text": "Set daily or monthly caps for a workspace or a single agent. Every call is metered at the gateway; at the cap, calls stop before they reach the provider, so they cost nothing. Spend shows what each agent used."}}, {"@type": "Question", "name": "Can I run several agents at once?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. kalypso splits a job and runs its parts in parallel, each agent in its own sandbox. The Board keeps track of who is doing what, and every step is there to read."}}, {"@type": "Question", "name": "macOS says it can't open the app.", "acceptedAnswer": {"@type": "Answer", "text": "Early builds aren't notarized yet. Open System Settings, then Privacy & Security, and click Open Anyway. You only do this once."}}, {"@type": "Question", "name": "Windows warns about the installer.", "acceptedAnswer": {"@type": "Answer", "text": "Early builds aren't signed yet. Click More info, then Run anyway. Our code signing policy explains what's coming."}}, {"@type": "Question", "name": "Is it ready for daily use?", "acceptedAnswer": {"@type": "Answer", "text": "It's in beta. Sandboxes, rules, the Vault, the gateway and budgets work today and are tested on macOS, Windows and Linux on every change. The roadmap shows what's left for 1.0."}}]}</script>
     </section>
     <section class="closer" aria-labelledby="closer-title">
+      <div class="closer-copy">
       <h2 id="closer-title">Run agents safely.</h2>
       <div>
         <p>Free to start, on your own machine. KALYPSO keeps every agent in its sandbox, checks every call and caps the spend, so you can hand off real work.</p>
         <div class="cta"><a class="btn primary" href="#download" data-dl>Download</a><a class="btn" href="https://github.com/kalyppso/kalypso">Star on GitHub</a></div>
       </div>
+      </div>
+      <figure class="closer-art"><img src="assets/art/shell-1.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></figure>
     </section>
   </main>
 
@@ -287,6 +306,7 @@
         <a href="#layers">How it works</a>
         <a href="#download">Download</a>
         <a href="https://github.com/kalyppso/kalypso/releases">Changelog</a>
+        <a href="blog/">Blog</a>
       </nav>
       <nav class="foot-col" aria-label="Resources">
         <b>Resources</b>
@@ -304,7 +324,7 @@
     <div class="foot-base"><span>&copy; 2026 KALYPSO. Open source under the <a href="https://github.com/kalyppso/kalypso/blob/main/LICENSE">MIT License</a>.</span><span>Built for people who let agents do real work.</span></div>
   </footer>
 
-  <script src="main.js?v=11" defer></script>
+  <script src="main.js?v=12" defer></script>
   <script>/* The floating bar turns dark over the dark bands, like the reference. */
     (function () {
       var bands = document.querySelectorAll(".band-dark"), on = new Set();

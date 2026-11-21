@@ -2,6 +2,8 @@
 // Everything works without the GitHub API; it only fills in real files and stars when it can.
 
 const REPO = "kalyppso/kalypso";
+// The site root, so pages in folders (the blog) find the same files.
+const SITE = new URL(".", document.currentScript?.src || location.href);
 document.documentElement.classList.add("js");
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -110,7 +112,7 @@ function platform() {
 async function latestRelease() {
   // First the copy published with the site (no rate limit), then GitHub's API as a fallback.
   try {
-    const own = await fetch("release.json", { cache: "no-cache" });
+    const own = await fetch(new URL("release.json", SITE), { cache: "no-cache" });
     if (own.ok) { const r = await own.json(); if (r && r.assets && r.assets.length) return r; }
   } catch { /* not deployed yet, or opened as a file */ }
   const res = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=10`, { headers: { Accept: "application/vnd.github+json" } });
@@ -124,7 +126,7 @@ async function latestRelease() {
   const os = platform();
   if (os) {
     $(`.oses li[data-os="${os}"]`)?.classList.add("mine");
-    $("#hero-label").textContent = `Download for ${NAME[os]}`;
+    { const l = $("#hero-label"); if (l) l.textContent = `Download for ${NAME[os]}`; }
   }
   let release = null;
   try { release = await latestRelease(); } catch { /* offline or rate-limited: links stay on the releases page */ }
@@ -134,14 +136,14 @@ async function latestRelease() {
     if (asset) { a.href = asset.browser_download_url; a.title = asset.name; } else a.hidden = true;
   }
   const dmg = release.assets.find((x) => PICK.dmg(x.name));
-  if (dmg && macArch(dmg.name)) $("#mac-arch").textContent = macArch(dmg.name);
+  if (dmg && macArch(dmg.name) && $("#mac-arch")) $("#mac-arch").textContent = macArch(dmg.name);
   const mine = os && release.assets.find((x) => PICK[MAIN[os]](x.name));
   if (mine) {
-    $("#hero-download").href = mine.browser_download_url;
+    if ($("#hero-download")) $("#hero-download").href = mine.browser_download_url;
     $$("[data-dl]").forEach((a) => (a.href = mine.browser_download_url));
   }
   const when = new Date(release.published_at).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
-  $("#release-line").textContent = `${release.tag_name}, ${when}. No account, no telemetry. Needs Docker or Podman.`;
+  if ($("#release-line")) $("#release-line").textContent = `${release.tag_name}, ${when}. No account, no telemetry. Needs Docker or Podman.`;
 })();
 
 // Stars: shown only once the number means something.
@@ -1071,4 +1073,25 @@ function makeOrb(el, size) {
       anim.onfinish = () => { anim = null; if (!opening) d.open = false; d.classList.remove("closing"); };
     });
   }
+})();
+
+/* ---------- The Product menu: a glass panel under the bar, on hover or click ---------- */
+(function mega() {
+  const btn = $(".nav-drop"), panel = $("#mega");
+  if (!btn || !panel) return;
+  const wrap = btn.closest(".nav-menu");
+  let t = 0;
+  const set = (open) => { clearTimeout(t); panel.hidden = !open; btn.setAttribute("aria-expanded", String(open)); document.documentElement.classList.toggle("mega-open", open); };
+  btn.addEventListener("click", () => set(panel.hidden));
+  if (matchMedia("(hover: hover)").matches) {
+    wrap.addEventListener("pointerenter", () => { clearTimeout(t); t = setTimeout(() => set(true), 80); });
+    wrap.addEventListener("pointerleave", () => { clearTimeout(t); t = setTimeout(() => set(false), 180); });
+  }
+  if (matchMedia("(hover: hover)").matches) {
+    panel.addEventListener("pointerenter", () => clearTimeout(t));
+    panel.addEventListener("pointerleave", () => { clearTimeout(t); t = setTimeout(() => set(false), 180); });
+  }
+  panel.addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !panel.hidden) { set(false); btn.focus(); } });
+  document.addEventListener("pointerdown", (e) => { if (!panel.hidden && !wrap.contains(e.target) && !panel.contains(e.target)) set(false); });
 })();

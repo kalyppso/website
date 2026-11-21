@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog · KALYPSO</title>
+  <meta name="description" content="Notes on building KALYPSO: running AI agents safely on your own machine.">
+  <meta property="og:title" content="Blog · KALYPSO">
+  <meta property="og:description" content="Notes on building KALYPSO: running AI agents safely on your own machine.">
+  <meta property="og:image" content="https://kalyppso.github.io/website/assets/overview-dark.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark light">
+  <script>/* Pick the theme before anything paints: your choice, else the system's. */
+    try { var t = localStorage.getItem("theme"); } catch (e) {}
+    document.documentElement.dataset.theme = "light"; document.documentElement.classList.add("dk");
+    try { if (localStorage.getItem("mode") === "white") document.documentElement.classList.add("white"); } catch (e) {}</script>
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="preload" href="../assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../docker.css?v=12">
+</head>
+<body class="blog-page">
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../" aria-label="KALYPSO home"><img src="../assets/mark.svg" alt="" width="30" height="30"><span>KALYPSO</span></a>
+      <span class="spacer"></span>
+      <div class="nav-menu"><button class="nav-link nav-drop" type="button" aria-expanded="false" aria-controls="mega">Product</button>
+      </div>
+      <a class="nav-link" href="../#layers">How it works</a>
+      <a class="nav-link" href="../#download">Download</a>
+      <a class="nav-link" href="../#faq">FAQ</a>
+      <a class="nav-link" href="./">Blog</a>
+      <a class="nav-link gh" href="https://github.com/kalyppso/kalypso"><svg class="i i-github-logo" aria-hidden="true" viewBox="0 0 256 256" fill="currentColor"><path d="M208.31,75.68A59.78,59.78,0,0,0,202.93,28,8,8,0,0,0,196,24a59.75,59.75,0,0,0-48,24H124A59.75,59.75,0,0,0,76,24a8,8,0,0,0-6.93,4,59.78,59.78,0,0,0-5.38,47.68A58.14,58.14,0,0,0,56,104v8a56.06,56.06,0,0,0,48.44,55.47A39.8,39.8,0,0,0,96,192v8H72a24,24,0,0,1-24-24A40,40,0,0,0,8,136a8,8,0,0,0,0,16,24,24,0,0,1,24,24,40,40,0,0,0,40,40H96v16a8,8,0,0,0,16,0V192a24,24,0,0,1,48,0v40a8,8,0,0,0,16,0V192a39.8,39.8,0,0,0-8.44-24.53A56.06,56.06,0,0,0,216,112v-8A58.14,58.14,0,0,0,208.31,75.68ZM200,112a40,40,0,0,1-40,40H112a40,40,0,0,1-40-40v-8a41.74,41.74,0,0,1,6.9-22.48A8,8,0,0,0,80,73.83a43.81,43.81,0,0,1,.79-33.58,43.88,43.88,0,0,1,32.32,20.06A8,8,0,0,0,119.82,64h32.35a8,8,0,0,0,6.74-3.69,43.87,43.87,0,0,1,32.32-20.06A43.81,43.81,0,0,1,192,73.83a8.09,8.09,0,0,0,1,7.65A41.72,41.72,0,0,1,200,104Z"/></svg><span>GitHub</span><span class="stars" data-stars hidden></span></a>
+      <button class="theme-btn" id="theme" type="button" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg><svg class="i-sun" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
+      <a class="btn sm" href="../#download" data-dl>Download</a>
+    </div>
+    <div class="mega" id="mega" hidden><div class="mega-col"><p>PRODUCT</p><a href="../#ask"><b>kalypso</b><span>Ask once; it plans the work and runs the crew</span></a><a href="../#live"><b>Crew</b><span>Agents, each in its own sandbox</span></a><a href="../#live"><b>Board <i>NEW</i></b><span>Hand out work as tasks and follow it</span></a><a href="../#live"><b>Toolkit <i>NEW</i></b><span>MCP servers and skills for any agent</span></a></div><div class="mega-col"><p>CONTROL</p><a href="../#trace"><b>Rules</b><span>Plain-language checks on every tool call</span></a><a href="../#trace"><b>Vault</b><span>Keys stay encrypted; agents get stand-ins</span></a><a href="../#layers"><b>Spend</b><span>Every token metered, with hard caps</span></a><a href="../#trace"><b>Egress proxy <i>NEW</i></b><span>Each sandbox's traffic follows your rules</span></a></div><div class="mega-col"><p>MODELS</p><a href="../#faq"><b>Any AI provider <i>NEW</i></b><span>Claude, OpenAI-compatible and local models</span></a><a href="../#faq"><b>Local models</b><span>Ollama, LM Studio and vLLM, on your machine</span></a></div></div>
+  </header>
+
+  <main id="main">
+    <section class="blog-head">
+      <span class="tag">Blog</span>
+      <h1>Notes from the workshop.</h1>
+      <p class="sub">What we're building into KALYPSO, why, and how it works underneath.</p>
+    </section>
+    <section class="blog-list">
+      <a class="post-card featured" href="keys-stay-home.html">
+        <div class="post-cover "><img src="../assets/art/shell-3.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
+        <div class="post-card-copy"><p class="post-meta"><span class="tag">Security</span><time datetime="2026-11-15">November 15, 2026</time></p><h2>Your agents shouldn&#x27;t hold your keys</h2><p>An agent that can read a key can leak it. So in KALYPSO, agents never get one. Here is how the keys stay home, and what changed this week.</p></div>
+      </a>
+      <a class="post-card" href="any-provider-egress-board.html">
+        <div class="post-cover "><img src="../assets/art/shell-2.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
+        <div class="post-card-copy"><p class="post-meta"><span class="tag">Product</span><time datetime="2026-11-14">November 14, 2026</time></p><h2>Any AI provider, an egress proxy and Board tasks</h2><p>Three larger pieces landed on main: bring any model, keep each sandbox&#x27;s traffic on a leash, and hand work out as tasks. They ship in the next release.</p></div>
+      </a>
+      <a class="post-card" href="meet-kalypso.html">
+        <div class="post-cover "><img src="../assets/art/shell-0.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
+        <div class="post-card-copy"><p class="post-meta"><span class="tag">Release</span><time datetime="2026-11-13">November 13, 2026</time></p><h2>Meet kalypso: one chat that runs your crew</h2><p>KALYPSO 0.2.2 beta adds kalypso, an agent you talk to that plans the work and hands it to the rest of your crew.</p></div>
+      </a>
+    </section>
+  </main>
+
+  <footer class="site-foot band-dark">
+    <div class="wm" aria-hidden="true"><canvas id="wm"></canvas></div>
+    <div class="footer">
+      <div class="foot-brand">
+        <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="24" height="24"><span>KALYPSO</span></a>
+        <p>Run AI agents safely, on your own machine.</p>
+        <a class="btn sm foot-cta" href="../#download" data-dl>Download</a>
+      </div>
+      <nav class="foot-col" aria-label="Product">
+        <b>Product</b>
+        <a href="../#ask">Ask</a>
+        <a href="../#layers">How it works</a>
+        <a href="../#download">Download</a>
+        <a href="https://github.com/kalyppso/kalypso/releases">Changelog</a>
+        <a href="./">Blog</a>
+      </nav>
+      <nav class="foot-col" aria-label="Resources">
+        <b>Resources</b>
+        <a href="https://github.com/kalyppso/kalypso/blob/main/docs/ARCHITECTURE.md">Architecture</a>
+        <a href="https://github.com/kalyppso/kalypso/issues/41">Roadmap</a>
+        <a href="../#faq">FAQ</a>
+        <a href="../code-signing.html">Code signing policy</a>
+      </nav>
+      <nav class="foot-col" aria-label="Open source">
+        <b>Open source</b>
+        <a href="https://github.com/kalyppso/kalypso">GitHub</a>
+        <a href="https://github.com/kalyppso/kalypso/issues">Report an issue</a>
+      </nav>
+    </div>
+    <div class="foot-base"><span>&copy; 2026 KALYPSO. Open source under the <a href="https://github.com/kalyppso/kalypso/blob/main/LICENSE">MIT License</a>.</span><span>Built for people who let agents do real work.</span></div>
+  </footer>
+
+  <script src="../main.js?v=12" defer></script>
+  <script>/* The floating bar turns dark over the dark bands, like the reference. */
+    (function () {
+      var bands = document.querySelectorAll(".band-dark"), on = new Set();
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { e.isIntersecting ? on.add(e.target) : on.delete(e.target); });
+        document.documentElement.classList.toggle("nav-dark", on.size > 0);
+      }, { rootMargin: "-12px 0px -92% 0px" });
+      bands.forEach(function (b) { io.observe(b); });
+    })();</script>
+</body>
+</html>
