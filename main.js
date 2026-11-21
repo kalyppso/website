@@ -488,6 +488,21 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
   const btn = $("#theme");
   if (!btn) return;
   const root = document.documentElement;
+  // The Docker-style page: dark bands by default, or white all the way through. Your choice is kept.
+  if (root.classList.contains("dk")) {
+    const label = () => btn.setAttribute("aria-label", root.classList.contains("white") ? "Switch to dark bands" : "Switch to white");
+    label();
+    btn.addEventListener("click", () => {
+      const white = !root.classList.contains("white");
+      root.classList.add("mode-switching");
+      root.classList.toggle("white", white);
+      try { localStorage.setItem("mode", white ? "white" : "dark"); } catch (e) {}
+      label();
+      dispatchEvent(new Event("themechange"));
+      setTimeout(() => root.classList.remove("mode-switching"), 450);
+    });
+    return;
+  }
   const label = () => btn.setAttribute("aria-label", root.dataset.theme === "light" ? "Switch to the dark theme" : "Switch to the white theme");
   const set = (t, save) => {
     root.dataset.theme = t;
@@ -527,7 +542,33 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
   // Where an element sits in the viewport: 0 entering at the bottom, 1 leaving at the top.
   const pos = (e) => { const r = e.boundingClientRect, h = e.rootBounds?.height || innerHeight; return Math.min(1, Math.max(0, (h - r.top) / (h + r.height))); };
   const shot = $(".ask-shot");
-  if (shot) track(shot, (e) => shot.style.setProperty("--tilt", Math.max(0, 1 - e.intersectionRatio * 1.6).toFixed(3)));
+  // The tour rises out of the page: tipped back and small, it comes up, stands and fills out as
+  // you scroll to it, smoothed every frame so it never steps. It starts over once it's flat.
+  if (shot && !reduce) {
+    let cur = 0, raf = 0, near = false, started = false;
+    const vid = $("video", shot);
+    const frame = () => {
+      raf = 0;
+      const r = shot.getBoundingClientRect(), vh = innerHeight;
+      const p = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.8)));
+      const want = 1 - (1 - p) ** 3;
+      cur += (want - cur) * 0.12;
+      if (Math.abs(want - cur) < 0.001) cur = want;
+      const k = 1 - cur;
+      shot.style.transform = `perspective(1600px) translate3d(0, ${(k * 110).toFixed(1)}px, 0) rotateX(${(k * 24).toFixed(2)}deg) scale(${(0.84 + 0.16 * cur).toFixed(4)})`;
+      shot.style.opacity = (0.25 + 0.75 * Math.min(1, cur * 1.4)).toFixed(3);
+      shot.style.setProperty("--lift", cur.toFixed(3));
+      if (!started && cur > 0.97 && vid) { started = true; try { vid.currentTime = 0; vid.play(); } catch (e) {} }
+      if (cur < 0.3) started = false;
+      if (near || cur !== want) raf = requestAnimationFrame(frame);
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
+    new IntersectionObserver(([e]) => { near = e.isIntersecting; kick(); }, { rootMargin: "200px 0px" }).observe(shot);
+    addEventListener("scroll", kick, { passive: true });
+    shot.style.transformOrigin = "50% 0%";
+    shot.style.willChange = "transform, opacity";
+    frame();
+  }
   $$(".use-img").forEach((el) => track(el, (e) => el.style.setProperty("--py", pos(e).toFixed(3))));
   const sign = $(".foot-sign");
   if (sign) track(sign, (e) => sign.style.setProperty("--open", Math.min(1, e.intersectionRatio * 1.4).toFixed(3)));
@@ -554,6 +595,9 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
   // warm paper in the light, the site's blue in the midtones, as the footer watermark.
   const site = document.documentElement.classList.contains("dk");
   const PAL = [[0, [16, 16, 16]], [0.35, [52, 66, 190]], [0.62, [98, 116, 255]], [0.85, [198, 204, 255]], [1, [255, 253, 250]]];
+  const white = () => document.documentElement.classList.contains("white");
+  const PALW = [[0, [228, 226, 220]], [0.45, [172, 180, 255]], [0.78, [75, 94, 252]], [1, [22, 24, 64]]];
+  const palW = (l) => { l = Math.min(1, Math.max(0, l)); for (let i = 1; i < PALW.length; i++) if (l <= PALW[i][0]) { const [a, ca] = PALW[i - 1], [b, cb] = PALW[i]; return mix(ca, cb, (l - a) / (b - a)); } return PALW[PALW.length - 1][1]; };
   const pal = (l) => { l = Math.min(1, Math.max(0, l)); for (let i = 1; i < PAL.length; i++) if (l <= PAL[i][0]) { const [a, ca] = PAL[i - 1], [b, cb] = PAL[i]; return mix(ca, cb, (l - a) / (b - a)); } return PAL[PAL.length - 1][1]; };
 
   for (const cv of cards) {
@@ -588,6 +632,15 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
           l *= 0.82 + 0.3 * Math.exp(-(((y / H) - (1.2 - py * 1.4)) ** 2) * 9);
           if (mx >= 0) { const d2 = (x - mx) ** 2 + (y - my) ** 2; l += 0.5 * Math.exp(-d2 / 2600); }
           // Every cell keeps a faint dot, so the grid reads as one surface; light grows it.
+          if (site && white()) {
+            // White: ink on paper, the painting's shadows in deep blue and near-black.
+            const dk = 1 - Math.min(1, l);
+            const r = r0 * (0.12 + 0.8 * dk ** 1.35);
+            const [cr, cg, cb] = palW(dk);
+            ctx.fillStyle = `rgb(${cr},${cg},${cb})`;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+            continue;
+          }
           if (site) {
             const r = r0 * (0.2 + 0.8 * Math.min(1, l) ** 1.1);
             const [cr, cg, cb] = pal(0.18 + l * 0.85);
@@ -617,6 +670,16 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
 (function tour() {
   const v = $(".ask-shot video");
   if (!v) return;
+  const pick = () => {
+    const white = document.documentElement.classList.contains("white");
+    const src = white ? "assets/tour-paper.mp4" : "assets/tour.mp4", poster = white ? "assets/tour-poster-paper.webp" : "assets/tour-poster.webp";
+    if (v.getAttribute("src") === src) return;
+    const playing = !v.paused, t = v.currentTime;
+    v.poster = poster; v.src = src;
+    v.addEventListener("loadedmetadata", () => { try { v.currentTime = t; } catch (e) {} if (playing) v.play().catch(() => {}); }, { once: true });
+  };
+  pick();
+  addEventListener("themechange", pick);
   if (reduce) { v.removeAttribute("autoplay"); v.pause(); v.controls = true; return; }
   new IntersectionObserver(([e]) => (e.isIntersecting ? v.play().catch(() => {}) : v.pause()), { threshold: 0.25 }).observe(v);
 })();
@@ -775,7 +838,12 @@ function makeOrb(el, size) {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const WORD = "kalypso";
   // A sweep from warm paper, through the site's blue, to silver.
-  const STOPS = [[0, [233, 231, 225]], [0.38, [140, 150, 255]], [0.62, [75, 94, 252]], [1, [184, 189, 201]]];
+  let STOPS;
+  const stops = () => (STOPS = document.documentElement.classList.contains("white")
+    ? [[0, [60, 60, 66]], [0.38, [98, 116, 255]], [0.62, [75, 94, 252]], [1, [110, 114, 128]]]
+    : [[0, [233, 231, 225]], [0.38, [140, 150, 255]], [0.62, [75, 94, 252]], [1, [184, 189, 201]]]);
+  stops();
+  addEventListener("themechange", () => { stops(); build(); });
   const colorAt = (t) => {
     for (let i = 1; i < STOPS.length; i++) {
       if (t <= STOPS[i][0]) {
@@ -829,7 +897,7 @@ function makeOrb(el, size) {
       const dx = x - mx, dy = y - my, q = dx * dx + dy * dy;
       if (q < R2) { const dist = Math.sqrt(q) || 1, f = 1 - dist / R; push = f; x += (dx / dist) * f * step * 1.6; y += (dy / dist) * f * step * 1.6; }
       const r = base * (0.7 + 0.55 * lit + 0.6 * push);
-      const a = 0.5 + 0.5 * lit + 0.3 * push;
+      const a = (document.documentElement.classList.contains("white") ? 0.78 : 0.5) + 0.5 * lit + 0.3 * push;
       ctx.fillStyle = `rgba(${d.c[0]},${d.c[1]},${d.c[2]},${Math.min(1, a)})`;
       ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
     }
@@ -864,6 +932,11 @@ function makeOrb(el, size) {
   startBtn.addEventListener("click", load);
   new IntersectionObserver(([e]) => { if (e.isIntersecting) load(); }, { rootMargin: "400px 0px" }).observe(box);
   big.addEventListener?.("change", load);
+  addEventListener("themechange", () => {
+    const poster = document.documentElement.classList.contains("white") ? "assets/tour-poster-paper.webp" : "assets/tour-poster.webp";
+    $$("img, source", startBtn).forEach((el) => (el.tagName === "IMG" ? (el.src = poster) : (el.srcset = poster)));
+    if (frame.src) { box.classList.remove("ready"); frame.addEventListener("load", () => box.classList.add("ready"), { once: true }); frame.contentWindow.location.reload(); }
+  });
   const close = () => { gate.hidden = true; box.classList.remove("gated"); };
   addEventListener("message", (e) => {
     if (e.origin !== location.origin || e.source !== frame.contentWindow || e.data?.kalypsoDemo !== "download") return;
@@ -891,7 +964,12 @@ function makeOrb(el, size) {
     cap: { cmd: "POST /openai/v1/chat/completions", steps: [["pass", "only the gateway is reachable"], ["pass", "allowed"], ["swap", "kx_ key → your real key"], ["block", "Daily cap of $5.00 reached"]], out: "Stopped at the gateway. It never reaches the provider, so it costs nothing." },
   };
   const ORDER = Object.keys(CALLS);
-  const C = { grid: "rgba(246,244,239,0.07)", gate: "rgba(246,244,239,0.22)", pass: "#6274ff", block: "#ff5a4e", ask: "#f6c445", ink: "#f6f4ef" };
+  const DARK = { grid: "rgba(246,244,239,0.07)", gate: "rgba(246,244,239,0.22)", path: "rgba(246,244,239,0.28)", pass: "#6274ff", block: "#ff5a4e", ask: "#f6c445", ink: "#f6f4ef" };
+  const LIGHT = { grid: "rgba(16,16,16,0.08)", gate: "rgba(16,16,16,0.22)", path: "rgba(16,16,16,0.3)", pass: "#4b5efc", block: "#e5382d", ask: "#c98a00", ink: "#101010" };
+  let C = DARK;
+  const mode = () => { C = document.documentElement.classList.contains("white") ? LIGHT : DARK; };
+  mode();
+  addEventListener("themechange", () => { mode(); if (pk && !pk.c) pk.c = null; paint(); });
   let W = 0, H = 0, dpr = 1, horiz = true, pts = [], lit = [], cur = null, timers = [], raf = 0, visible = false, chosen = false;
   let pk = null, bits = [], trail = [];
 
@@ -913,7 +991,7 @@ function makeOrb(el, size) {
     for (let y = s / 2; y < H; y += s) for (let x = s / 2; x < W; x += s) dot(x, y, 1, C.grid);
     // The path, then each gate as a line of dots, lit by its verdict.
     const [sx, sy] = pts[0], [ex, ey] = pts[pts.length - 1];
-    for (let t = 0; t <= 1; t += 6 / Math.max(1, Math.hypot(ex - sx, ey - sy))) dot(sx + (ex - sx) * t, sy + (ey - sy) * t, 1.3, "rgba(246,244,239,0.28)");
+    for (let t = 0; t <= 1; t += 6 / Math.max(1, Math.hypot(ex - sx, ey - sy))) dot(sx + (ex - sx) * t, sy + (ey - sy) * t, 1.3, C.path);
     for (let i = 1; i < pts.length; i++) {
       const v = lit[i - 1], c = v === "block" ? C.block : v === "ask" ? C.ask : v && v !== "skip" ? C.pass : C.gate;
       const r = v && v !== "skip" ? 2.1 : 1.5;

@@ -13,7 +13,8 @@
   <meta name="color-scheme" content="dark light">
   <script>/* Pick the theme before anything paints: your choice, else the system's. */
     try { var t = localStorage.getItem("theme"); } catch (e) {}
-    document.documentElement.dataset.theme = "light"; document.documentElement.classList.add("dk");</script>
+    document.documentElement.dataset.theme = "light"; document.documentElement.classList.add("dk");
+    try { if (localStorage.getItem("mode") === "white") document.documentElement.classList.add("white"); } catch (e) {}</script>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">

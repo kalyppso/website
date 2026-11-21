@@ -312,3 +312,69 @@ html.dk .faq .qa a { color: var(--text); text-underline-offset: 3px; }
   html.dk .faq-side { position: static; }
   html.dk .faq .qa summary { font-size: 17px; padding: 20px 0; }
 }
+
+/* The tour's shadow grows as it stands up. */
+html.dk .ask-shot { box-shadow: 0 calc(10px + var(--lift, 1) * 40px) calc(40px + var(--lift, 1) * 70px) calc(-30px - var(--lift, 1) * 20px) rgba(16, 16, 16, calc(0.15 + var(--lift, 1) * 0.3)) !important; transform-style: preserve-3d; }
+html.dk .ask { perspective: none; }
+
+/* ================= White mode: the same page with no dark bands ================= */
+html.dk .theme-btn { display: inline-grid; width: 36px; height: 36px; border-radius: 6px; border-color: currentColor; color: inherit; }
+html.dk .theme-btn .i-sun { display: block; }
+html.dk .theme-btn .i-moon { display: none; }
+html.dk.white .theme-btn .i-sun { display: none; }
+html.dk.white .theme-btn .i-moon { display: block; }
+html.dk.mode-switching *, html.dk.mode-switching *::before { transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease !important; }
+
+html.dk.white .band-dark {
+  --bg: var(--paper-2); --panel: #ffffff; --panel-2: #faf9f6; --panel-3: #f1efea;
+  --line: var(--hair); --line-2: var(--hair); --line-3: #d6d2c9;
+  --text: #101010; --text-2: var(--body); --text-3: #75777f;
+  --accent: #101010; --accent-fg: #fffdfa; --ink: 22 22 26;
+  --g1: #101010; --g2: #6b6b75; --g3: #2a2a30; --g4: #9a9aa3;
+  background: var(--paper-2); color: var(--text); color-scheme: light;
+}
+html.dk.white.nav-dark .nav-inner { background: rgba(255, 253, 250, 0.86); border-color: var(--hair); color: var(--text); }
+html.dk.white .hero .btn:not(.primary) { color: #101010; }
+html.dk.white .pill { border-color: #d6d2c9; color: #101010; }
+html.dk.white .pill:hover { border-color: #101010; }
+html.dk.white .pill b { background: #ffe9e0; color: #d2461d; }
+html.dk.white .hero h1 span:last-child { color: #8e8e95; }
+
+/* The tour, the app tabs and the live preview in their paper versions. */
+html.dk.white .ask-shot { background: #fffdfa !important; border-color: var(--hair) !important; }
+html.dk.white .show-main { background: var(--paper-2); --line-2: var(--hair); --panel: #fff; --text: #101010; --text-2: var(--body); --bg: #fffdfa; }
+html.dk.white .show-tabs { border-bottom-color: var(--hair); }
+html.dk.white .show-tabs button { color: #75777f; }
+html.dk.white .show-tabs button[aria-selected="true"] { color: #101010; }
+html.dk.white .show-frame { border-color: var(--hair); background: #fffdfa; }
+html.dk.white .show-main .show-shot .dk { display: none; }
+html.dk.white .show-main .show-shot .lt { display: block; }
+html.dk.white .live { background: #fffdfa; border-color: var(--hair); box-shadow: 0 40px 100px -50px rgba(30, 28, 24, 0.35); }
+html.dk.white .live-bar { border-bottom-color: var(--hair); color: #75777f; }
+html.dk.white .live-dots i { background: #e2ded5; }
+html.dk.white .live-title { color: #101010; }
+html.dk.white .live-screen, html.dk.white .live-screen iframe, html.dk.white .live-start { background: #fffdfa; }
+html.dk.white .live-play { background: #101010; color: #fffdfa; }
+html.dk.white .live-gate { background: rgba(255, 253, 250, 0.6); }
+html.dk.white .live-gate-card { border: 1px solid var(--hair); box-shadow: 0 30px 80px -30px rgba(30, 28, 24, 0.3); }
+
+/* Hand-off pictures on paper tiles. */
+html.dk.white .use-img { background: var(--paper-2) !important; }
+
+/* Follow a call, on paper. */
+html.dk.white .trace { background: var(--paper-2); color: #101010; border-color: var(--hair); }
+html.dk.white .trace-pick { border-bottom-color: var(--hair); }
+html.dk.white .trace-ask { color: #75777f; }
+html.dk.white .trace-pick button { border-color: #d6d2c9; color: #2a2a2e; }
+html.dk.white .trace-pick button:hover { border-color: #4b5efc; color: #101010; }
+html.dk.white .trace-pick button[aria-pressed="true"] { background: #101010; color: #fffdfa; border-color: #101010; }
+html.dk.white .trace-cmd span { color: #4b5efc; }
+html.dk.white .trace-caret { background: #101010; }
+html.dk.white .trace-gates b, html.dk.white .trace-gates small, html.dk.white .trace-gates em { background: var(--paper-2); }
+html.dk.white .trace-gates small { color: #75777f; }
+html.dk.white .trace-gates em { color: #75777f; }
+html.dk.white .trace-gates li[data-v="pass"] em, html.dk.white .trace-gates li[data-v="give"] em, html.dk.white .trace-gates li[data-v="swap"] em, html.dk.white .trace-gates li[data-v="meter"] em, html.dk.white .trace-gates li[data-v="done"] em { color: #3546d8; }
+html.dk.white .trace-gates li[data-v="block"] em, html.dk.white .trace-gates li[data-v="block"] b::before { color: #d2342a; }
+html.dk.white .trace-gates li[data-v="ask"] em, html.dk.white .trace-gates li[data-v="ask"] b::before { color: #a86f00; }
+html.dk.white .trace-out { color: var(--body); }
+html.dk.white.nav-dark .nav-inner .brand img, html.dk.white .site-foot .brand img { filter: invert(1); }

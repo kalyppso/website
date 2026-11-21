@@ -1,10 +1,14 @@
 /* The live preview on kalyppso.github.io: the real app with sample data. Look around freely;
    anything that would change something (typing, saving, starting, toggling) asks you to download. */
 (function () {
+  let white = false;
+  try { white = parent !== window && parent.document.documentElement.classList.contains("white"); } catch (e) { /* not embedded */ }
   try {
     localStorage.setItem("kalypso.proto.v2", JSON.stringify({
       session: { name: "sam", email: "sam@example.com", provider: "email", linked: [], since: "2026-11-01" },
-      appearance: { theme: "custom", bg: "#101010", text: "#f6f4ef", accent: "#6274ff", font: "geist", size: "default" },
+      appearance: white
+        ? { theme: "custom", bg: "#fffdfa", text: "#101010", accent: "#4b5efc", font: "geist", size: "default" }
+        : { theme: "custom", bg: "#101010", text: "#f6f4ef", accent: "#6274ff", font: "geist", size: "default" },
       prefs: { ambient: false },
       view: "overview",
     }));
