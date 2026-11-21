@@ -571,9 +571,9 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
   // On the Docker-style page the pictures sit on night tiles, in the site's own colours:
   // warm paper in the light, the site's blue in the midtones, as the footer watermark.
   const site = document.documentElement.classList.contains("dk");
-  const PAL = [[0, [16, 16, 16]], [0.35, [52, 66, 190]], [0.62, [98, 116, 255]], [0.85, [198, 204, 255]], [1, [255, 253, 250]]];
+  const PAL = [[0, [16, 16, 16]], [0.35, [62, 61, 58]], [0.62, [138, 135, 128]], [0.85, [212, 208, 199]], [1, [255, 253, 250]]];
   const white = () => document.documentElement.classList.contains("white");
-  const PALW = [[0, [228, 226, 220]], [0.45, [172, 180, 255]], [0.78, [75, 94, 252]], [1, [22, 24, 64]]];
+  const PALW = [[0, [228, 226, 220]], [0.45, [176, 172, 164]], [0.78, [78, 77, 74]], [1, [16, 16, 16]]];
   const palW = (l) => { l = Math.min(1, Math.max(0, l)); for (let i = 1; i < PALW.length; i++) if (l <= PALW[i][0]) { const [a, ca] = PALW[i - 1], [b, cb] = PALW[i]; return mix(ca, cb, (l - a) / (b - a)); } return PALW[PALW.length - 1][1]; };
   const pal = (l) => { l = Math.min(1, Math.max(0, l)); for (let i = 1; i < PAL.length; i++) if (l <= PAL[i][0]) { const [a, ca] = PAL[i - 1], [b, cb] = PAL[i]; return mix(ca, cb, (l - a) / (b - a)); } return PAL[PAL.length - 1][1]; };
 
@@ -817,8 +817,8 @@ function makeOrb(el, size) {
   // A sweep from warm paper, through the site's blue, to silver.
   let STOPS;
   const stops = () => (STOPS = document.documentElement.classList.contains("white")
-    ? [[0, [60, 60, 66]], [0.38, [98, 116, 255]], [0.62, [75, 94, 252]], [1, [110, 114, 128]]]
-    : [[0, [233, 231, 225]], [0.38, [140, 150, 255]], [0.62, [75, 94, 252]], [1, [184, 189, 201]]]);
+    ? [[0, [70, 70, 74]], [0.5, [16, 16, 16]], [1, [110, 108, 102]]]
+    : [[0, [233, 231, 225]], [0.5, [150, 148, 142]], [1, [205, 202, 194]]]);
   stops();
   addEventListener("themechange", () => { stops(); build(); });
   const colorAt = (t) => {
@@ -941,8 +941,8 @@ function makeOrb(el, size) {
     cap: { cmd: "POST /openai/v1/chat/completions", steps: [["pass", "only the gateway is reachable"], ["pass", "allowed"], ["swap", "kx_ key → your real key"], ["block", "Daily cap of $5.00 reached"]], out: "Stopped at the gateway. It never reaches the provider, so it costs nothing." },
   };
   const ORDER = Object.keys(CALLS);
-  const DARK = { grid: "rgba(246,244,239,0.07)", gate: "rgba(246,244,239,0.22)", path: "rgba(246,244,239,0.28)", pass: "#6274ff", block: "#ff5a4e", ask: "#f6c445", ink: "#f6f4ef" };
-  const LIGHT = { grid: "rgba(16,16,16,0.08)", gate: "rgba(16,16,16,0.22)", path: "rgba(16,16,16,0.3)", pass: "#4b5efc", block: "#e5382d", ask: "#c98a00", ink: "#101010" };
+  const DARK = { grid: "rgba(246,244,239,0.07)", gate: "rgba(246,244,239,0.22)", path: "rgba(246,244,239,0.28)", pass: "#f6f4ef", block: "#ff5a4e", ask: "#f6c445", ink: "#f6f4ef", trail: "246,244,239" };
+  const LIGHT = { grid: "rgba(16,16,16,0.08)", gate: "rgba(16,16,16,0.22)", path: "rgba(16,16,16,0.3)", pass: "#101010", block: "#e5382d", ask: "#c98a00", ink: "#101010", trail: "16,16,16" };
   let C = DARK;
   const mode = () => { C = document.documentElement.classList.contains("white") ? LIGHT : DARK; };
   mode();
@@ -975,7 +975,7 @@ function makeOrb(el, size) {
       if (horiz) for (let y = 10; y < H - 4; y += 8) dot(pts[i][0], y, r, c);
       else for (let x = 8; x < 44; x += 8) dot(x, pts[i][1], r, c);
     }
-    for (const t of trail) dot(t[0], t[1], 2 * t[2], `rgba(98,116,255,${t[2] * 0.7})`);
+    for (const t of trail) dot(t[0], t[1], 2 * t[2], `rgba(${C.trail},${t[2] * 0.5})`);
     if (pk) for (let k = 0; k < 7; k++) { const a = (k / 6) * 6.2832 + pk.t * 3; dot(pk.x + (k ? Math.cos(a) * 5.5 : 0), pk.y + (k ? Math.sin(a) * 5.5 : 0), k ? 2 : 2.6, pk.c || C.ink); }
     for (const b of bits) dot(b.x, b.y, 2, `rgba(255,90,78,${b.a})`);
   };

@@ -7,8 +7,8 @@ html.dk {
   --paper-2: #f4f2ed;
   --night: #101010;
   --night-2: #1a1a1a;
-  --vivid: #4b5efc;
-  --vivid-2: #6274ff;
+  --vivid: #101010;
+  --vivid-2: #2c2c2f;
   --body: #4a4c55;
   --hair: #e6e2da;
   --radius-band: 44px;
@@ -240,12 +240,12 @@ html.dk .trace { margin-top: 36px; border-radius: 16px; background: #101010; col
 html.dk .trace-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 18px 20px; border-bottom: 1px solid #222; }
 html.dk .trace-ask { color: #8b8a86; font-size: 14px; margin-right: 6px; }
 html.dk .trace-pick button { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid #333; background: transparent; color: #d9d6cf; cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s; }
-html.dk .trace-pick button:hover { border-color: #6274ff; color: #fff; }
+html.dk .trace-pick button:hover { border-color: #f6f4ef; color: #fff; }
 html.dk .trace-pick button:active { transform: scale(0.97); }
 html.dk .trace-pick button[aria-pressed="true"] { background: #f6f4ef; color: #101010; border-color: #f6f4ef; }
 html.dk .trace-stage { padding: 22px 24px 26px; }
 html.dk .trace-cmd { display: flex; align-items: center; gap: 12px; font-family: "Geist Mono", ui-monospace, monospace; font-size: 15px; min-height: 24px; }
-html.dk .trace-cmd span { color: #6274ff; }
+html.dk .trace-cmd span { color: #b9b6ae; }
 html.dk .trace-cmd span::after { content: " $"; color: #8b8a86; }
 html.dk .trace-caret { width: 8px; height: 17px; background: #f6f4ef; margin-left: -8px; animation: caret 1s steps(1) infinite; }
 @keyframes caret { 50% { opacity: 0; } }
@@ -257,7 +257,7 @@ html.dk .trace-gates b { font-weight: 500; font-size: 15px; background: #101010;
 html.dk .trace-gates small { color: #8b8a86; font-size: 12.5px; margin-top: 4px; background: #101010; padding: 0 6px; }
 html.dk .trace-gates em { margin-top: auto; font-style: normal; font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; line-height: 1.4; min-height: 2.8em; padding: 6px 8px; border-radius: 8px; background: #101010; color: #8b8a86; opacity: 0; transform: translateY(6px); transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
 html.dk .trace-gates li[data-v] em { opacity: 1; transform: none; }
-html.dk .trace-gates li[data-v="pass"] em, html.dk .trace-gates li[data-v="give"] em, html.dk .trace-gates li[data-v="swap"] em, html.dk .trace-gates li[data-v="meter"] em, html.dk .trace-gates li[data-v="done"] em { color: #b4bdff; }
+html.dk .trace-gates li[data-v="pass"] em, html.dk .trace-gates li[data-v="give"] em, html.dk .trace-gates li[data-v="swap"] em, html.dk .trace-gates li[data-v="meter"] em, html.dk .trace-gates li[data-v="done"] em { color: #e9e6df; }
 html.dk .trace-gates li[data-v="block"] em { color: #ff8a80; }
 html.dk .trace-gates li[data-v="ask"] em { color: #f6c445; }
 html.dk .trace-gates li[data-v="block"] b::before { content: "Blocked · "; color: #ff5a4e; }
@@ -366,14 +366,14 @@ html.dk.white .trace { background: var(--paper-2); color: #101010; border-color:
 html.dk.white .trace-pick { border-bottom-color: var(--hair); }
 html.dk.white .trace-ask { color: #75777f; }
 html.dk.white .trace-pick button { border-color: #d6d2c9; color: #2a2a2e; }
-html.dk.white .trace-pick button:hover { border-color: #4b5efc; color: #101010; }
+html.dk.white .trace-pick button:hover { border-color: #101010; color: #101010; }
 html.dk.white .trace-pick button[aria-pressed="true"] { background: #101010; color: #fffdfa; border-color: #101010; }
-html.dk.white .trace-cmd span { color: #4b5efc; }
+html.dk.white .trace-cmd span { color: #75777f; }
 html.dk.white .trace-caret { background: #101010; }
 html.dk.white .trace-gates b, html.dk.white .trace-gates small, html.dk.white .trace-gates em { background: var(--paper-2); }
 html.dk.white .trace-gates small { color: #75777f; }
 html.dk.white .trace-gates em { color: #75777f; }
-html.dk.white .trace-gates li[data-v="pass"] em, html.dk.white .trace-gates li[data-v="give"] em, html.dk.white .trace-gates li[data-v="swap"] em, html.dk.white .trace-gates li[data-v="meter"] em, html.dk.white .trace-gates li[data-v="done"] em { color: #3546d8; }
+html.dk.white .trace-gates li[data-v="pass"] em, html.dk.white .trace-gates li[data-v="give"] em, html.dk.white .trace-gates li[data-v="swap"] em, html.dk.white .trace-gates li[data-v="meter"] em, html.dk.white .trace-gates li[data-v="done"] em { color: #101010; }
 html.dk.white .trace-gates li[data-v="block"] em, html.dk.white .trace-gates li[data-v="block"] b::before { color: #d2342a; }
 html.dk.white .trace-gates li[data-v="ask"] em, html.dk.white .trace-gates li[data-v="ask"] b::before { color: #a86f00; }
 html.dk.white .trace-out { color: var(--body); }
@@ -486,7 +486,7 @@ html.dk.white.nav-dark .nav-inner { background: rgba(255, 253, 250, 0.42) !impor
 html.dk .nav-menu { position: static; display: flex; }
 html.dk .nav-drop { font: inherit; font-size: 14.5px; background: none; border: 0; padding: 0; cursor: pointer; color: inherit; opacity: 0.92; }
 html.dk .nav-drop[aria-expanded="true"] { color: var(--vivid); opacity: 1; }
-html.dk.nav-dark:not(.white) .nav-drop[aria-expanded="true"] { color: #9aa6ff; }
+html.dk.nav-dark:not(.white) .nav-drop[aria-expanded="true"] { color: #ffffff; }
 
 /* The Product menu, in the same glass. */
 html.dk .mega { position: absolute; left: -1px; right: -1px; top: calc(100% + 8px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 32px; padding: 26px 28px 22px; border-radius: 14px; border: 1px solid rgba(16, 16, 16, 0.08); background: rgba(246, 244, 239, 0.62); backdrop-filter: blur(28px) saturate(1.5); -webkit-backdrop-filter: blur(28px) saturate(1.5); color: #101010; box-shadow: 0 30px 80px -30px rgba(16, 16, 16, 0.3); animation: mega-in 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -498,7 +498,7 @@ html.dk .mega a b { display: flex; align-items: center; gap: 10px; font-weight: 
 html.dk .mega a i { font: 600 10.5px/1 var(--mono); font-style: normal; letter-spacing: 0.06em; padding: 4px 6px; border-radius: 4px; background: var(--vivid); color: #fff; }
 html.dk .mega a span { display: block; margin-top: 3px; font-size: 14px; opacity: 0.7; }
 html.dk .mega a:hover b { color: var(--vivid); }
-html.dk.nav-dark:not(.white) .mega a:hover b { color: #9aa6ff; }
+html.dk.nav-dark:not(.white) .mega a:hover b { color: #ffffff; }
 @keyframes mega-in { from { opacity: 0; transform: translateY(-6px); } }
 @media (max-width: 760px) { html.dk .nav-menu { display: none; } }
 @media (prefers-reduced-motion: reduce) { html.dk .mega { animation: none; } }
@@ -524,3 +524,29 @@ html.dk .openrow ul { justify-content: space-between; gap: 18px 28px; flex-wrap:
 html.dk .openrow li { font-size: 22px; }
 html.dk .o-serif { font-size: 25px !important; }
 html.dk .o-mono { font-size: 18px !important; }
+
+
+/* ================= Black, not blue: our own accent ================= */
+/* On the dark bands and the dark bar, the primary button turns pearl so it still stands out. */
+html.dk .band-dark .btn.primary, html.dk.nav-dark:not(.white) .nav .btn.sm { background: #f6f4ef !important; border-color: #f6f4ef !important; color: #101010 !important; }
+html.dk .band-dark .btn.primary:hover, html.dk.nav-dark:not(.white) .nav .btn.sm:hover { background: #ffffff !important; }
+html.dk .btn.primary:hover { background: #2c2c2f; border-color: #2c2c2f; }
+/* The "new" line in the hero: no orange badge, just a quiet pearl chip. */
+html.dk .pill b { background: #f6f4ef; color: #101010; }
+html.dk.white .pill b { background: #101010; color: #fffdfa; }
+/* Section labels: a small square and mono caps, no outlined box. */
+html.dk .tag { border: 0 !important; padding: 0 !important; border-radius: 0; display: inline-flex; align-items: center; gap: 9px; opacity: 0.8; }
+html.dk .tag::before { content: ""; width: 7px; height: 7px; background: currentColor; border-radius: 1px; }
+/* The trust band: warm charcoal, set apart from the black bands around it. */
+html.dk .band-vivid { background: #1c1b19 !important; }
+html.dk.white .band-vivid { background: #e9e6df !important; color: #101010; --text: #101010; }
+html.dk.white .band-vivid h2, html.dk.white .band-vivid p, html.dk.white .band-vivid .stat, html.dk.white .band-vivid .stat-cap { color: #101010 !important; }
+html.dk.white .band-vivid .three article { background: rgba(255, 255, 255, 0.6) !important; }
+html.dk.white .trust-sub { color: #4a4c55; }
+html.dk .band-vivid h2 span { color: #8e8e95 !important; }
+/* Menu badges and the dark menu. */
+html.dk.nav-dark:not(.white) .mega a i { background: #f6f4ef; color: #101010; }
+html.dk .faq .qa summary:hover { color: #6f6c66; }
+html.dk .post-next:hover b { color: #6f6c66; }
+html.dk .faq-cats button:hover { border-color: #101010; }
+html.dk .oses li.mine b::after { color: var(--text-3); }

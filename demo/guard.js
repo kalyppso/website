@@ -7,8 +7,8 @@
     localStorage.setItem("kalypso.proto.v2", JSON.stringify({
       session: { name: "sam", email: "sam@example.com", provider: "email", linked: [], since: "2026-11-01" },
       appearance: white
-        ? { theme: "custom", bg: "#fffdfa", text: "#101010", accent: "#4b5efc", font: "geist", size: "default" }
-        : { theme: "custom", bg: "#101010", text: "#f6f4ef", accent: "#6274ff", font: "geist", size: "default" },
+        ? { theme: "custom", bg: "#fffdfa", text: "#101010", accent: "#101010", font: "geist", size: "default" }
+        : { theme: "custom", bg: "#101010", text: "#f6f4ef", accent: "#e9e6df", font: "geist", size: "default" },
       prefs: { ambient: false },
       view: "overview",
     }));
