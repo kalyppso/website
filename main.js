@@ -542,39 +542,89 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
   // Where an element sits in the viewport: 0 entering at the bottom, 1 leaving at the top.
   const pos = (e) => { const r = e.boundingClientRect, h = e.rootBounds?.height || innerHeight; return Math.min(1, Math.max(0, (h - r.top) / (h + r.height))); };
   const shot = $(".ask-shot");
-  // The tour comes to you: the stage is tall and the player pins to the screen while you scroll
-  // through it, growing from a small card tipped back into the page to nearly the whole screen.
+  // The tour assembles: the stage pins to the screen and, as you scroll, the player is built
+  // from tiles of the live video flying in from every side, until they lock into the whole thing.
   const stage = $(".ask-stage");
   if (shot && stage && !reduce) {
-    let cur = 0, raf = 0, near = false, started = false;
-    const vid = $("video", shot);
+    const pin = $(".ask-pin", stage), vid = $("video", shot);
+    const cv = document.createElement("canvas");
+    cv.className = "ask-tiles"; cv.setAttribute("aria-hidden", "true");
+    pin.append(cv);
+    const ctx = cv.getContext("2d");
+    let poster = new Image(), posterSrc = "";
+    const usePoster = () => { if (vid && vid.poster !== posterSrc) { posterSrc = vid.poster; poster = new Image(); poster.src = posterSrc; } };
+    let tiles = [], cols = 0, rows = 0, cur = 0, raf = 0, near = false, started = false, W = 0, H = 0, dpr = 1;
+    const seedTiles = () => {
+      const small = innerWidth < 760;
+      cols = small ? 6 : 10; rows = small ? 4 : 6;
+      let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      tiles = [];
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        // Each tile comes from beyond the edge it's nearest to, with a little spin.
+        const ux = (c + 0.5) / cols - 0.5, uy = (r + 0.5) / rows - 0.5;
+        const ang = Math.atan2(uy * 1.6, ux) + (rnd() - 0.5) * 1.4;
+        tiles.push({ c, r, dx: Math.cos(ang), dy: Math.sin(ang), dist: 0.55 + rnd() * 0.6, rot: (rnd() - 0.5) * 2.4, lag: (Math.abs(ux) + Math.abs(uy)) * 0.35 + rnd() * 0.2 });
+      }
+    };
+    const fit = () => {
+      dpr = Math.min(2, devicePixelRatio || 1);
+      W = pin.clientWidth + 0; H = pin.clientHeight;
+      const vw = document.documentElement.clientWidth;
+      cv.style.width = vw + "px"; cv.style.height = H + "px";
+      cv.width = Math.round(vw * dpr); cv.height = Math.round(H * dpr);
+      W = vw;
+      const w = shot.offsetWidth, h = shot.offsetHeight;
+      const full = Math.min((vw - 48) / w, (H - 120) / h);
+      shot.style.transform = `translate3d(0, 30px, 0) scale(${full.toFixed(4)})`;
+      seedTiles();
+    };
+    const draw = () => {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      if (cur >= 0.999) return;
+      const src = vid && vid.readyState >= 2 ? vid : poster.complete && poster.naturalWidth ? poster : null;
+      if (!src) return;
+      const sw = src.videoWidth || src.naturalWidth, sh = src.videoHeight || src.naturalHeight;
+      const pr = pin.getBoundingClientRect(), r = shot.getBoundingClientRect();
+      const ox = r.left - (pr.left + pr.width / 2 - W / 2), oy = r.top - pr.top;
+      const tw = r.width / cols, th = r.height / rows, far = Math.max(W, H);
+      for (const t of tiles) {
+        const k = Math.min(1, Math.max(0, (cur - t.lag * 0.6) / (1 - t.lag * 0.6)));
+        const e = 1 - (1 - k) ** 3, m = 1 - e;
+        if (k <= 0) continue;
+        const cx = ox + (t.c + 0.5) * tw + t.dx * far * t.dist * m, cy = oy + (t.r + 0.5) * th + t.dy * far * t.dist * m;
+        const gap = Math.max(0, 10 * m * m - 0.4), sc = 0.7 + 0.3 * e;
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, k * 2.2);
+        ctx.translate(cx, cy); ctx.rotate(t.rot * m); ctx.scale(sc, sc);
+        ctx.drawImage(src, (t.c / cols) * sw, (t.r / rows) * sh, sw / cols, sh / rows, -tw / 2 + gap / 2, -th / 2 + gap / 2, tw - gap + 1.2, th - gap + 1.2);
+        ctx.restore();
+      }
+    };
     const frame = () => {
       raf = 0;
-      const r = stage.getBoundingClientRect(), vh = innerHeight, vw = document.documentElement.clientWidth;
-      // 0 as the stage reaches the top of the screen, 1 once you've scrolled 75% of the way through it.
+      usePoster();
+      const r = stage.getBoundingClientRect(), vh = innerHeight;
       const run = Math.max(1, r.height - vh);
-      const p = Math.min(1, Math.max(0, -r.top / (run * 0.75)));
-      const want = p * p * (3 - 2 * p);
-      cur += (want - cur) * 0.14;
-      if (Math.abs(want - cur) < 0.0005) cur = want;
-      const w = shot.offsetWidth, h = shot.offsetHeight;
-      const full = Math.min((vw - 48) / w, (vh - 120) / h);
-      const s0 = Math.min(0.5, full * 0.5);
-      const sc = s0 + (full - s0) * cur, k = 1 - cur;
-      shot.style.transform = `perspective(1400px) translate3d(0, ${(k * 60 + cur * 30).toFixed(1)}px, 0) rotateX(${(k * 28).toFixed(2)}deg) scale(${sc.toFixed(4)})`;
-      shot.style.borderRadius = `${(28 - 16 * cur).toFixed(1)}px`;
-      shot.style.setProperty("--lift", cur.toFixed(3));
-      stage.style.setProperty("--dim", cur.toFixed(3));
-      if (!started && cur > 0.92 && vid) { started = true; try { vid.currentTime = 0; vid.play(); } catch (e) {} }
-      if (cur < 0.2) started = false;
-      if (near || cur !== want) raf = requestAnimationFrame(frame);
+      // Starts as the stage comes up the screen, complete two thirds of the way through the pin.
+      const p = Math.min(1, Math.max(0, (vh * 0.5 - r.top) / (run * 0.65 + vh * 0.5)));
+      cur += (p - cur) * 0.16;
+      if (Math.abs(p - cur) < 0.0008) cur = p;
+      const whole = cur >= 0.999;
+      shot.classList.toggle("whole", whole);
+      cv.style.opacity = whole ? "0" : "1";
+      if (vid) {
+        if (cur > 0.01 && !started) { started = true; try { vid.currentTime = 0; } catch (e) {} vid.play().catch(() => {}); }
+        if (cur <= 0.005) started = false;
+      }
+      draw();
+      if (near || cur !== p) raf = requestAnimationFrame(frame);
     };
     const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
-    new IntersectionObserver(([e]) => { near = e.isIntersecting; kick(); }).observe(stage);
+    new IntersectionObserver(([e]) => { near = e.isIntersecting; kick(); }, { rootMargin: "100px 0px" }).observe(stage);
     addEventListener("scroll", kick, { passive: true });
-    addEventListener("resize", kick);
-    shot.style.transformOrigin = "50% 50%";
-    shot.style.willChange = "transform";
+    addEventListener("resize", () => { fit(); kick(); });
+    fit();
     frame();
   }
   $$(".use-img").forEach((el) => track(el, (e) => el.style.setProperty("--py", pos(e).toFixed(3))));
