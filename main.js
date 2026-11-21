@@ -817,8 +817,8 @@ function makeOrb(el, size) {
   // A sweep from warm paper, through the site's blue, to silver.
   let STOPS;
   const stops = () => (STOPS = document.documentElement.classList.contains("white")
-    ? [[0, [70, 70, 74]], [0.5, [16, 16, 16]], [1, [110, 108, 102]]]
-    : [[0, [233, 231, 225]], [0.5, [150, 148, 142]], [1, [205, 202, 194]]]);
+    ? [[0, [60, 60, 66]], [0.38, [98, 116, 255]], [0.62, [75, 94, 252]], [1, [110, 114, 128]]]
+    : [[0, [233, 231, 225]], [0.38, [140, 150, 255]], [0.62, [75, 94, 252]], [1, [184, 189, 201]]]);
   stops();
   addEventListener("themechange", () => { stops(); build(); });
   const colorAt = (t) => {
