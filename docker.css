@@ -395,3 +395,9 @@ html.dk .ask-pin .ask-shot { transform-origin: 50% 50%; opacity: 0 !important; t
 html.dk .ask-pin .ask-shot.whole { opacity: 1 !important; }
 html.dk .ask-tiles { position: absolute; top: 0; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 2; transition: opacity 0.25s ease; }
 @media (prefers-reduced-motion: reduce) { html.dk .ask-pin .ask-shot { opacity: 1 !important; } html.dk .ask-tiles { display: none; } }
+
+/* The tour, simply: it fades in on screen and out when it leaves. */
+html.dk .ask-shot { transform: none !important; opacity: 0; transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 40px 100px -50px rgba(16, 16, 16, 0.45) !important; }
+html.dk .ask-shot.seen { opacity: 1; }
+html:not(.js) .ask-shot { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { html.dk .ask-shot { opacity: 1; transition: none; } }
