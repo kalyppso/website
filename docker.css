@@ -184,3 +184,14 @@ html.dk .show-tabs { gap: 22px; border-bottom: 1px solid #2a2a2a; margin-bottom:
 html.dk .show-tabs button { border: 0 !important; background: none !important; padding: 10px 0 12px; border-radius: 0; font: 12px var(--mono); letter-spacing: 0.08em; }
 html.dk .show-tabs .bar { left: 0; right: 0; top: auto; bottom: -1px; height: 1px; }
 html.dk .show-frame { border-color: #2a2a2a; background: #161616; }
+
+/* Product shots as whole, framed windows (no fade-outs), and no glows behind sections. */
+html.dk .ask-shot, html.dk .show-frame { -webkit-mask-image: none !important; mask-image: none !important; }
+html.dk .ask-shot { border: 1px solid var(--hair); border-radius: 16px; box-shadow: 0 30px 80px -40px rgba(30, 28, 24, 0.35); background: var(--paper); }
+html.dk main > section::after, html.dk main > section::before { display: none !important; }
+html.dk .ask-copy h2 b { background: none; -webkit-background-clip: border-box; background-clip: border-box; }
+
+/* The footer watermark: the word in dots, cropped by the footer like the reference's. */
+html.dk .wm { max-width: var(--col); margin: 0 auto 8px; overflow: hidden; touch-action: pan-y; }
+html.dk .wm canvas { display: block; }
+html.dk .site-foot { padding-top: 40px; }

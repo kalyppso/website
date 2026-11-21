@@ -720,3 +720,83 @@ function makeOrb(el, size) {
     isle.addEventListener("pointerleave", () => { map.style.setProperty("--mx", 0); map.style.setProperty("--my", 0); });
   }
 })();
+
+/* ---------- The footer watermark: "kalypso" in dots, a light passing over it ---------- */
+(function watermark() {
+  const cv = document.getElementById("wm");
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const WORD = "kalypso";
+  // A sweep from warm paper, through the site's blue, to silver.
+  const STOPS = [[0, [233, 231, 225]], [0.38, [140, 150, 255]], [0.62, [75, 94, 252]], [1, [184, 189, 201]]];
+  const colorAt = (t) => {
+    for (let i = 1; i < STOPS.length; i++) {
+      if (t <= STOPS[i][0]) {
+        const [a, ca] = STOPS[i - 1], [b, cb] = STOPS[i], k = (t - a) / (b - a);
+        return ca.map((v, j) => Math.round(v + (cb[j] - v) * k));
+      }
+    }
+    return STOPS[STOPS.length - 1][1];
+  };
+  let W = 0, H = 0, dpr = 1, step = 6, dots = [], raf = 0, visible = false, t0 = performance.now();
+  let mx = -1e5, my = -1e5;
+
+  const build = async () => {
+    try { await document.fonts.ready; } catch (e) { /* draw with what's there */ }
+    dpr = Math.min(2, devicePixelRatio || 1);
+    W = cv.parentElement.clientWidth;
+    // The letters fill the width; the canvas shows their top two thirds, cropping the tails.
+    const off = document.createElement("canvas"), o = off.getContext("2d");
+    let size = 100;
+    o.font = `600 ${size}px Geist, system-ui, sans-serif`;
+    size = Math.floor(size * (W * 0.98) / o.measureText(WORD).width);
+    H = Math.round(size * 0.78);
+    step = Math.max(3, Math.round(size / 46));
+    off.width = W; off.height = Math.round(size * 1.1);
+    o.font = `600 ${size}px Geist, system-ui, sans-serif`;
+    o.textBaseline = "alphabetic"; o.fillStyle = "#000";
+    o.fillText(WORD, (W - o.measureText(WORD).width) / 2, size * 0.86);
+    const px = o.getImageData(0, 0, off.width, off.height).data;
+    dots = [];
+    for (let y = step / 2; y < H; y += step) {
+      for (let x = step / 2; x < W; x += step) {
+        if (px[(Math.floor(y) * off.width + Math.floor(x)) * 4 + 3] > 120) dots.push({ x, y, c: colorAt(x / W) });
+      }
+    }
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    cv.style.width = W + "px"; cv.style.height = H + "px";
+    draw(performance.now());
+  };
+
+  const draw = (now) => {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const base = step * 0.36;
+    // The light crosses every 7 seconds, then rests a moment.
+    const phase = reduce ? 0.5 : ((now - t0) % 7000) / 5200;
+    const lx = -0.15 * W + phase * 1.3 * W, band = W * 0.12;
+    const R = step * 9, R2 = R * R;
+    for (const d of dots) {
+      const lit = Math.exp(-((d.x - lx) ** 2) / (2 * band * band));
+      let x = d.x, y = d.y, push = 0;
+      const dx = x - mx, dy = y - my, q = dx * dx + dy * dy;
+      if (q < R2) { const dist = Math.sqrt(q) || 1, f = 1 - dist / R; push = f; x += (dx / dist) * f * step * 1.6; y += (dy / dist) * f * step * 1.6; }
+      const r = base * (0.7 + 0.55 * lit + 0.6 * push);
+      const a = 0.5 + 0.5 * lit + 0.3 * push;
+      ctx.fillStyle = `rgba(${d.c[0]},${d.c[1]},${d.c[2]},${Math.min(1, a)})`;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+    }
+  };
+
+  const loop = (now) => { raf = 0; if (!visible) return; draw(now); raf = requestAnimationFrame(loop); };
+  const start = () => { if (!raf && !reduce && visible) raf = requestAnimationFrame(loop); };
+  const point = (e) => { const b = cv.getBoundingClientRect(); mx = e.clientX - b.left; my = e.clientY - b.top; };
+  cv.addEventListener("pointermove", point, { passive: true });
+  cv.addEventListener("pointerdown", point, { passive: true });
+  for (const ev of ["pointerleave", "pointercancel", "pointerup"]) cv.addEventListener(ev, () => { mx = my = -1e5; }, { passive: true });
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) start(); }).observe(cv);
+  let rs = 0;
+  new ResizeObserver(() => { clearTimeout(rs); rs = setTimeout(build, 120); }).observe(cv.parentElement);
+  build();
+})();
