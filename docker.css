@@ -378,3 +378,12 @@ html.dk.white .trace-gates li[data-v="block"] em, html.dk.white .trace-gates li[
 html.dk.white .trace-gates li[data-v="ask"] em, html.dk.white .trace-gates li[data-v="ask"] b::before { color: #a86f00; }
 html.dk.white .trace-out { color: var(--body); }
 html.dk.white.nav-dark .nav-inner .brand img, html.dk.white .site-foot .brand img { filter: invert(1); }
+
+/* The tour, pinned: it grows from a small tilted card to nearly the whole screen as you scroll. */
+html.dk .ask-stage { position: relative; height: 240vh; margin-top: 24px; }
+html.dk .ask-pin { position: sticky; top: 0; height: 100vh; display: grid; place-items: center; overflow: visible; }
+html.dk .ask-pin .ask-shot { width: min(100%, 1200px); margin: 0; opacity: 1 !important; overflow: hidden; }
+html.dk .ask-stage::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: #101010; opacity: calc(var(--dim, 0) * 0); }
+@media (max-width: 760px) { html.dk .ask-stage { height: 140vh; } }
+@media (prefers-reduced-motion: reduce) { html.dk .ask-stage { height: auto; } html.dk .ask-pin { position: static; height: auto; } }
+html.dk section.ask { overflow: visible; }

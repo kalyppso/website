@@ -542,31 +542,39 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
   // Where an element sits in the viewport: 0 entering at the bottom, 1 leaving at the top.
   const pos = (e) => { const r = e.boundingClientRect, h = e.rootBounds?.height || innerHeight; return Math.min(1, Math.max(0, (h - r.top) / (h + r.height))); };
   const shot = $(".ask-shot");
-  // The tour rises out of the page: tipped back and small, it comes up, stands and fills out as
-  // you scroll to it, smoothed every frame so it never steps. It starts over once it's flat.
-  if (shot && !reduce) {
+  // The tour comes to you: the stage is tall and the player pins to the screen while you scroll
+  // through it, growing from a small card tipped back into the page to nearly the whole screen.
+  const stage = $(".ask-stage");
+  if (shot && stage && !reduce) {
     let cur = 0, raf = 0, near = false, started = false;
     const vid = $("video", shot);
     const frame = () => {
       raf = 0;
-      const r = shot.getBoundingClientRect(), vh = innerHeight;
-      const p = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.8)));
-      const want = 1 - (1 - p) ** 3;
-      cur += (want - cur) * 0.12;
-      if (Math.abs(want - cur) < 0.001) cur = want;
-      const k = 1 - cur;
-      shot.style.transform = `perspective(1600px) translate3d(0, ${(k * 110).toFixed(1)}px, 0) rotateX(${(k * 24).toFixed(2)}deg) scale(${(0.84 + 0.16 * cur).toFixed(4)})`;
-      shot.style.opacity = (0.25 + 0.75 * Math.min(1, cur * 1.4)).toFixed(3);
+      const r = stage.getBoundingClientRect(), vh = innerHeight, vw = document.documentElement.clientWidth;
+      // 0 as the stage reaches the top of the screen, 1 once you've scrolled 75% of the way through it.
+      const run = Math.max(1, r.height - vh);
+      const p = Math.min(1, Math.max(0, -r.top / (run * 0.75)));
+      const want = p * p * (3 - 2 * p);
+      cur += (want - cur) * 0.14;
+      if (Math.abs(want - cur) < 0.0005) cur = want;
+      const w = shot.offsetWidth, h = shot.offsetHeight;
+      const full = Math.min((vw - 48) / w, (vh - 120) / h);
+      const s0 = Math.min(0.5, full * 0.5);
+      const sc = s0 + (full - s0) * cur, k = 1 - cur;
+      shot.style.transform = `perspective(1400px) translate3d(0, ${(k * 60 + cur * 30).toFixed(1)}px, 0) rotateX(${(k * 28).toFixed(2)}deg) scale(${sc.toFixed(4)})`;
+      shot.style.borderRadius = `${(28 - 16 * cur).toFixed(1)}px`;
       shot.style.setProperty("--lift", cur.toFixed(3));
-      if (!started && cur > 0.97 && vid) { started = true; try { vid.currentTime = 0; vid.play(); } catch (e) {} }
-      if (cur < 0.3) started = false;
+      stage.style.setProperty("--dim", cur.toFixed(3));
+      if (!started && cur > 0.92 && vid) { started = true; try { vid.currentTime = 0; vid.play(); } catch (e) {} }
+      if (cur < 0.2) started = false;
       if (near || cur !== want) raf = requestAnimationFrame(frame);
     };
     const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
-    new IntersectionObserver(([e]) => { near = e.isIntersecting; kick(); }, { rootMargin: "200px 0px" }).observe(shot);
+    new IntersectionObserver(([e]) => { near = e.isIntersecting; kick(); }).observe(stage);
     addEventListener("scroll", kick, { passive: true });
-    shot.style.transformOrigin = "50% 0%";
-    shot.style.willChange = "transform, opacity";
+    addEventListener("resize", kick);
+    shot.style.transformOrigin = "50% 50%";
+    shot.style.willChange = "transform";
     frame();
   }
   $$(".use-img").forEach((el) => track(el, (e) => el.style.setProperty("--py", pos(e).toFixed(3))));
