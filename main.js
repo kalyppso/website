@@ -248,28 +248,41 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
   }
   starts.push(xs.length);
   const nv = xs.length, hd = K.head, cx0 = K.w / 2, cy0 = K.h / 2;
+  // For the scroll collapse: short pieces of every line, each with its own drift and spin.
+  const pieces = [];
+  for (let k = 0; k < starts.length - 1; k++) for (let a = starts[k]; a < starts[k + 1] - 1; a += 6) pieces.push([a, Math.min(starts[k + 1], a + 7)]);
+  let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const PC = pieces.map(([a, b]) => {
+    let cx = 0, cy = 0; for (let i = a; i < b; i++) { cx += xs[i]; cy += ys[i]; } cx /= b - a; cy /= b - a;
+    const ang = Math.atan2(cy - K.h * 0.45, cx - cx0) + (rnd() - 0.5) * 1.6;
+    return { cx, cy, dx: Math.cos(ang), dy: Math.sin(ang) - 0.25, d: 0.25 + rnd() * 0.9, spin: (rnd() - 0.5) * 3, lag: rnd() * 0.35 };
+  });
   const depth = (x, y) => { const dx = (x - hd.cx) / hd.rx, dy = (y - hd.cy) / hd.ry, q = 1 - dx * dx - dy * dy; return q > 0 ? Math.sqrt(q) * hd.rx * 0.55 : 0; };
   const PX = Float32Array.from(xs, (x) => x - cx0), PY = Float32Array.from(ys, (y) => y - cy0);
   const PZ = Float32Array.from(xs, (x, i) => depth(x, ys[i]));
   const QX = new Float32Array(nv), QY = new Float32Array(nv);
 
-  let W = 0, H = 0, dpr = 1, s = 1;
+  const hero = fig.closest(".hero") || fig;
+  let W = 0, H = 0, dpr = 1, s = 1, ox = 0, oy = 0, FH = 0, col = 0, colT = 0;
   let rx = 0, ry = 0, tx = 0, ty = 0; // turn, -1..1
   let mx = -1e5, my = -1e5; // cursor, in CSS pixels on the canvas
   let t0 = 0, raf = null, visible = true, last = 0;
 
   const size = () => {
     dpr = Math.min(2, devicePixelRatio || 1);
-    W = fig.clientWidth;
-    H = W * (K.h / K.w);
+    // The canvas covers the whole band, so pieces can fly anywhere in it; she sits where the figure is.
+    const FW = fig.clientWidth; FH = FW * (K.h / K.w); fig.style.height = FH + "px";
+    W = hero.clientWidth; H = hero.clientHeight;
+    const hb = hero.getBoundingClientRect(), fb = fig.getBoundingClientRect();
+    ox = fb.left - hb.left; oy = fb.top - hb.top;
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-    cv.style.height = H + "px";
-    s = W / K.w;
+    cv.style.width = W + "px"; cv.style.height = H + "px";
+    s = FW / K.w;
   };
 
   const place = (x, y, z, cyr, syr, cxr, sxr) => {
     const X = x * cyr + z * syr, Z1 = -x * syr + z * cyr;
-    return [(X + cx0) * s, (y * cxr - Z1 * sxr + cy0) * s];
+    return [(X + cx0) * s + ox, (y * cxr - Z1 * sxr + cy0) * s + oy];
   };
 
   const draw = (now) => {
@@ -280,27 +293,43 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
     for (let i = 0; i < nv; i++) {
       const x = PX[i], y = PY[i], z = PZ[i];
       const X = x * cyr + z * syr, Z1 = -x * syr + z * cyr;
-      let px = (X + cx0) * s, py = (y * cxr - Z1 * sxr + cy0) * s;
+      let px = (X + cx0) * s + ox, py = (y * cxr - Z1 * sxr + cy0) * s + oy;
       const dx = px - mx, dy = py - my, d2 = dx * dx + dy * dy;
       if (d2 < R2) { const d = Math.sqrt(d2) || 1, f = (1 - d / R); const p = f * f * PUSH; px += (dx / d) * p; py += (dy / d) * p; }
       QX[i] = px; QY[i] = py;
     }
     const path = new Path2D();
-    for (let k = 0; k < starts.length - 1; k++) {
-      const a = starts[k], b = starts[k + 1];
-      path.moveTo(QX[a], QY[a]);
-      for (let i = a + 1; i < b; i++) path.lineTo(QX[i], QY[i]);
+    if (col > 0.002) {
+      // Scrolled: she comes apart, each piece drifting out and turning, the way the band collapses.
+      const far = Math.max(W, H) * 0.75;
+      for (let k = 0; k < pieces.length; k++) {
+        const [a, b] = pieces[k], q = PC[k];
+        const c = Math.max(0, Math.min(1, (col - q.lag * 0.4) / (1 - q.lag * 0.4)));
+        const e = c * c * (3 - 2 * c), off = e * q.d * far, rot = e * q.spin;
+        const pcx = q.cx * s + ox, pcy = q.cy * s + oy, cr = Math.cos(rot), sr = Math.sin(rot);
+        for (let i = a; i < b; i++) {
+          const ux = QX[i] - pcx, uy = QY[i] - pcy;
+          const X = pcx + ux * cr - uy * sr + q.dx * off, Y = pcy + ux * sr + uy * cr + q.dy * off;
+          i === a ? path.moveTo(X, Y) : path.lineTo(X, Y);
+        }
+      }
+    } else {
+      for (let k = 0; k < starts.length - 1; k++) {
+        const a = starts[k], b = starts[k + 1];
+        path.moveTo(QX[a], QY[a]);
+        for (let i = a + 1; i < b; i++) path.lineTo(QX[i], QY[i]);
+      }
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
     ctx.lineJoin = ctx.lineCap = "round";
     // Drawn in from the bottom: everything below the rising edge, and the edge itself lit.
     const rise = reduce ? 1 : Math.min(1, t / 1700);
-    const edge = H * (1 - (1 - (1 - rise) ** 3));
+    const edge = oy + FH * (1 - (1 - (1 - rise) ** 3));
     ctx.save();
-    ctx.beginPath(); ctx.rect(0, edge, W, H - edge); ctx.clip();
+    ctx.beginPath(); ctx.rect(0, rise < 1 ? edge : 0, W, rise < 1 ? H - edge : H); ctx.clip();
     ctx.lineWidth = 0.75;
-    ctx.strokeStyle = `rgba(${ink},0.82)`;
+    ctx.strokeStyle = `rgba(${ink},${(0.82 * (1 - col * 0.55)).toFixed(3)})`;
     ctx.stroke(path);
     ctx.restore();
     const lit = (y0, h, a) => {
@@ -308,9 +337,9 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
       ctx.lineWidth = 1.1; ctx.strokeStyle = `rgba(${ink},${a})`; ctx.stroke(path); ctx.restore();
     };
     if (rise < 1) { lit(edge, 10, 1); return; }
-    // A scanline every 8 seconds.
-    const scan = reduce ? -1 : ((t - 2600) % 8000) / 1700;
-    if (scan >= 0 && scan <= 1) lit(scan * H - 9, 18, 0.9);
+    // A scanline every 8 seconds, while she's whole.
+    const scan = reduce || col > 0.05 ? -1 : ((t - 2600) % 8000) / 1700;
+    if (scan >= 0 && scan <= 1) lit(oy + scan * FH - 9, 18, 0.9);
   };
 
   // Phones and tablets have no cursor: she sways on her own, follows a finger, and, where the
@@ -326,6 +355,10 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
     }
     rx += (tx - rx) * 0.08;
     ry += (ty - ry) * 0.08;
+    // Scrolling down the band collapses her; scrolling back up puts her together again.
+    colT = Math.max(0, Math.min(1, scrollY / Math.max(1, hero.offsetHeight * 0.7)));
+    col += (colT - col) * 0.12;
+    hero.style.setProperty("--collapse", col.toFixed(3));
     if (now - last > (fine ? 16 : 33)) { draw(now); last = now; }
     raf = requestAnimationFrame(loop);
   };
@@ -333,27 +366,28 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
 
   if (fine && !reduce) {
     addEventListener("pointermove", (e) => {
-      const b = cv.getBoundingClientRect();
-      tx = Math.max(-1, Math.min(1, (e.clientX - (b.left + b.width / 2)) / (innerWidth / 2)));
-      ty = Math.max(-1, Math.min(1, (e.clientY - (b.top + b.height * 0.42)) / (innerHeight / 2)));
-      mx = e.clientX - b.left;
-      my = e.clientY - b.top;
+      const b = fig.getBoundingClientRect(), c = cv.getBoundingClientRect();
+      // She turns toward the cursor wherever it is on the page, a little more than before.
+      tx = Math.max(-1, Math.min(1, (e.clientX - (b.left + b.width / 2)) / (innerWidth / 2.6)));
+      ty = Math.max(-1, Math.min(1, (e.clientY - (b.top + b.height * 0.42)) / (innerHeight / 2.2)));
+      mx = e.clientX - c.left;
+      my = e.clientY - c.top;
     }, { passive: true });
     document.documentElement.addEventListener("pointerleave", () => { tx = ty = 0; mx = my = -1e5; });
   }
   if (!fine && !reduce) {
     const follow = (e) => {
-      const b = cv.getBoundingClientRect();
+      const b = fig.getBoundingClientRect(), c = cv.getBoundingClientRect();
       tx = Math.max(-1, Math.min(1, (e.clientX - (b.left + b.width / 2)) / (b.width / 2)));
       ty = Math.max(-1, Math.min(1, (e.clientY - (b.top + b.height * 0.42)) / (b.height / 2)));
-      mx = e.clientX - b.left;
-      my = e.clientY - b.top;
+      mx = e.clientX - c.left;
+      my = e.clientY - c.top;
     };
     const release = () => { touching = false; mx = my = -1e5; };
-    cv.addEventListener("pointerdown", (e) => { touching = true; follow(e); askTilt(); }, { passive: true });
-    cv.addEventListener("pointermove", (e) => { if (touching) follow(e); }, { passive: true });
+    fig.addEventListener("pointerdown", (e) => { touching = true; follow(e); askTilt(); }, { passive: true });
+    fig.addEventListener("pointermove", (e) => { if (touching) follow(e); }, { passive: true });
     // Scrolling the page takes the finger over (pointercancel): she goes back to swaying.
-    for (const ev of ["pointerup", "pointercancel", "pointerleave"]) cv.addEventListener(ev, release, { passive: true });
+    for (const ev of ["pointerup", "pointercancel", "pointerleave"]) fig.addEventListener(ev, release, { passive: true });
 
     const onTilt = (e) => {
       if (e.gamma == null || e.beta == null || touching) return;
@@ -374,7 +408,7 @@ $$(".three, .get, .faq").forEach((el) => { el.classList.add("reveal"); io.observ
       addEventListener("deviceorientation", onTilt, { passive: true });
     }
   }
-  new ResizeObserver(() => { size(); if (reduce) draw(performance.now()); }).observe(fig);
+  new ResizeObserver(() => { size(); if (reduce) draw(performance.now()); }).observe(hero);
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) start(); }).observe(cv);
   size();
   t0 = performance.now();
@@ -955,4 +989,33 @@ function makeOrb(el, size) {
     if (!visible) { timers.forEach(clearTimeout); timers = []; }
   }, { threshold: 0.35 }).observe(box);
   layout(); play(ORDER[0]);
+})();
+
+/* ---------- Questions: filter by topic, open and close smoothly ---------- */
+(function faq() {
+  const box = $(".faq");
+  if (!box) return;
+  const items = $$(".qa details", box), chips = $$(".faq-cats button", box);
+  chips.forEach((c) => c.addEventListener("click", () => {
+    chips.forEach((x) => x.setAttribute("aria-pressed", String(x === c)));
+    items.forEach((d) => { d.hidden = c.dataset.cat !== "all" && d.dataset.cat !== c.dataset.cat; });
+  }));
+  if (reduce) return;
+  for (const d of items) {
+    const sum = $("summary", d), body = $(".qa-a", d);
+    let anim = null;
+    sum.addEventListener("click", (e) => {
+      e.preventDefault();
+      anim?.cancel();
+      const opening = !d.open;
+      if (opening) d.open = true;
+      const h = body.scrollHeight;
+      d.classList.toggle("closing", !opening);
+      anim = body.animate(
+        [{ height: opening ? "0px" : h + "px", opacity: opening ? 0 : 1 }, { height: opening ? h + "px" : "0px", opacity: opening ? 1 : 0 }],
+        { duration: 320, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+      );
+      anim.onfinish = () => { anim = null; if (!opening) d.open = false; d.classList.remove("closing"); };
+    });
+  }
 })();
