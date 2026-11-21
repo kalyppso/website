@@ -516,6 +516,11 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
   const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
   // Ink near the bottom-left, a hint of the gradient toward the top-right.
   const tint = (u, v) => { const k = Math.min(1, Math.max(0, (u + (1 - v)) / 2)); return mix(rgb, grad[1], 0.35 * k); };
+  // On the Docker-style page the pictures sit on night tiles, in the site's own colours:
+  // warm paper in the light, the site's blue in the midtones, as the footer watermark.
+  const site = document.documentElement.classList.contains("dk");
+  const PAL = [[0, [16, 16, 16]], [0.35, [52, 66, 190]], [0.62, [98, 116, 255]], [0.85, [198, 204, 255]], [1, [255, 253, 250]]];
+  const pal = (l) => { l = Math.min(1, Math.max(0, l)); for (let i = 1; i < PAL.length; i++) if (l <= PAL[i][0]) { const [a, ca] = PAL[i - 1], [b, cb] = PAL[i]; return mix(ca, cb, (l - a) / (b - a)); } return PAL[PAL.length - 1][1]; };
 
   for (const cv of cards) {
     const ctx = cv.getContext("2d");
@@ -544,11 +549,18 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
         for (let x = step / 2; x < W; x += step) {
           const sx = Math.min(lw - 1, Math.max(0, Math.floor((x - ox) / sc))), sy = Math.min(lh - 1, Math.max(0, Math.floor((y - oy) / sc)));
           // Light theme: dots are ink on paper, so they carry the painting's darkness.
-          let l = light ? 1 - lum[sy * lw + sx] * 0.92 : lum[sy * lw + sx];
+          let l = light && !site ? 1 - lum[sy * lw + sx] * 0.92 : lum[sy * lw + sx];
           // A slow light passes over the picture as you scroll; the cursor brightens what it touches.
           l *= 0.82 + 0.3 * Math.exp(-(((y / H) - (1.2 - py * 1.4)) ** 2) * 9);
           if (mx >= 0) { const d2 = (x - mx) ** 2 + (y - my) ** 2; l += 0.5 * Math.exp(-d2 / 2600); }
           // Every cell keeps a faint dot, so the grid reads as one surface; light grows it.
+          if (site) {
+            const r = r0 * (0.2 + 0.8 * Math.min(1, l) ** 1.1);
+            const [cr, cg, cb] = pal(0.18 + l * 0.85);
+            ctx.fillStyle = `rgb(${cr},${cg},${cb})`;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+            continue;
+          }
           const r = r0 * (light ? 0.14 + 0.86 * Math.min(1, l) ** 1.2 : 0.16 + 0.84 * Math.min(1, l) ** 1.15);
           const [cr, cg, cb] = tint(x / W, y / H);
           ctx.fillStyle = `rgba(${cr},${cg},${cb},${(light ? 0.14 + 0.8 * Math.min(1, l) ** 1.25 : 0.22 + 0.78 * Math.min(1, l)).toFixed(2)})`;
@@ -799,4 +811,148 @@ function makeOrb(el, size) {
   let rs = 0;
   new ResizeObserver(() => { clearTimeout(rs); rs = setTimeout(build, 120); }).observe(cv.parentElement);
   build();
+})();
+
+/* ---------- See it work: the real app, sample data, anything you'd change asks you to download ---------- */
+(function live() {
+  const box = $("#live"), frame = $("#live-frame"), screen = $(".live-screen"), startBtn = $("#live-start"), gate = $("#live-gate");
+  if (!box || !frame) return;
+  const W = 1280, H = 800;
+  const big = matchMedia("(min-width: 900px)");
+  const fit = () => { const s = Math.min(1, screen.clientWidth / W); screen.style.setProperty("--s", s); screen.style.height = `${Math.round(H * s)}px`; };
+  new ResizeObserver(fit).observe(screen);
+  fit();
+  const load = () => {
+    if (frame.src || !big.matches) return;
+    frame.src = frame.dataset.src;
+    frame.addEventListener("load", () => box.classList.add("ready"), { once: true });
+  };
+  startBtn.addEventListener("click", load);
+  new IntersectionObserver(([e]) => { if (e.isIntersecting) load(); }, { rootMargin: "400px 0px" }).observe(box);
+  big.addEventListener?.("change", load);
+  const close = () => { gate.hidden = true; box.classList.remove("gated"); };
+  addEventListener("message", (e) => {
+    if (e.origin !== location.origin || e.source !== frame.contentWindow || e.data?.kalypsoDemo !== "download") return;
+    gate.hidden = false; box.classList.add("gated");
+  });
+  $("#live-gate-close").addEventListener("click", close);
+  gate.addEventListener("click", (e) => { if (e.target === gate) close(); });
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !gate.hidden) close(); });
+  $("#live-gate .btn.primary").addEventListener("click", close);
+})();
+
+/* ---------- Follow a call: pick what the agent does, watch each layer decide ---------- */
+(function trace() {
+  const box = $("#trace");
+  if (!box) return;
+  const cv = $("#trace-cv"), ctx = cv.getContext("2d"), field = $(".trace-field", box);
+  const cmdEl = $("#trace-cmd"), out = $("#trace-out"), gates = $$(".trace-gates li", box), picks = $$(".trace-pick button", box);
+  // [verdict, note] per gate; verdicts: pass, skip, block, ask, give, swap, meter.
+  const CALLS = {
+    tests: { cmd: "npm test", steps: [["pass", "inside /work"], ["pass", "allowed"], ["skip", "no secret needed"], ["skip", "no model call"], ["done", "24 passing"]], out: "It runs in coder's own sandbox. Nothing else on your machine is in reach." },
+    push: { cmd: "git push --force origin main", steps: [["pass", "inside /work"], ["block", "No force-push to main"]], out: "Stopped before it ran. coder is told why, and pushes a branch instead." },
+    host: { cmd: "curl https://api.unknown.dev/v1", steps: [["pass", "through the egress proxy"], ["ask", "Ask before unknown hosts"], ["skip", "no secret needed"], ["skip", "no model call"], ["done", "200 OK"]], out: "It waits for you. Approve it once, always, or never." },
+    secret: { cmd: "gh pr create --fill", steps: [["pass", "inside /work"], ["pass", "allowed"], ["give", "GITHUB_TOKEN, as a file"], ["skip", "no model call"], ["done", "pull request #482"]], out: "The token arrives as a file in /run/kalypso/secrets. It never enters a prompt, so no model ever sees it." },
+    model: { cmd: "POST /anthropic/v1/messages  key: kx_7f…", steps: [["pass", "only the gateway is reachable"], ["pass", "allowed"], ["swap", "kx_ key → your real key"], ["meter", "$0.012 · $3.82 left today"], ["done", "Claude Sonnet 5.5"]], out: "The agent holds a stand-in key. Your real key is added at the gateway, after secrets are scrubbed from the request." },
+    cap: { cmd: "POST /openai/v1/chat/completions", steps: [["pass", "only the gateway is reachable"], ["pass", "allowed"], ["swap", "kx_ key → your real key"], ["block", "Daily cap of $5.00 reached"]], out: "Stopped at the gateway. It never reaches the provider, so it costs nothing." },
+  };
+  const ORDER = Object.keys(CALLS);
+  const C = { grid: "rgba(246,244,239,0.07)", gate: "rgba(246,244,239,0.22)", pass: "#6274ff", block: "#ff5a4e", ask: "#f6c445", ink: "#f6f4ef" };
+  let W = 0, H = 0, dpr = 1, horiz = true, pts = [], lit = [], cur = null, timers = [], raf = 0, visible = false, chosen = false;
+  let pk = null, bits = [], trail = [];
+
+  const layout = () => {
+    dpr = Math.min(2, devicePixelRatio || 1);
+    W = field.clientWidth; H = field.clientHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    cv.style.width = W + "px"; cv.style.height = H + "px";
+    horiz = W >= 720;
+    const fb = field.getBoundingClientRect();
+    pts = gates.map((g) => { const b = g.getBoundingClientRect(); return horiz ? [b.left - fb.left + b.width / 2, H * 0.5] : [22, b.top - fb.top + b.height / 2]; });
+    pts.unshift(horiz ? [0, H * 0.5] : [22, 0]);
+    paint();
+  };
+  const dot = (x, y, r, c) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill(); };
+  const paint = () => {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    const s = 16;
+    for (let y = s / 2; y < H; y += s) for (let x = s / 2; x < W; x += s) dot(x, y, 1, C.grid);
+    // The path, then each gate as a line of dots, lit by its verdict.
+    const [sx, sy] = pts[0], [ex, ey] = pts[pts.length - 1];
+    for (let t = 0; t <= 1; t += 6 / Math.max(1, Math.hypot(ex - sx, ey - sy))) dot(sx + (ex - sx) * t, sy + (ey - sy) * t, 1.3, "rgba(246,244,239,0.28)");
+    for (let i = 1; i < pts.length; i++) {
+      const v = lit[i - 1], c = v === "block" ? C.block : v === "ask" ? C.ask : v && v !== "skip" ? C.pass : C.gate;
+      const r = v && v !== "skip" ? 2.1 : 1.5;
+      if (horiz) for (let y = 10; y < H - 4; y += 8) dot(pts[i][0], y, r, c);
+      else for (let x = 8; x < 44; x += 8) dot(x, pts[i][1], r, c);
+    }
+    for (const t of trail) dot(t[0], t[1], 2 * t[2], `rgba(98,116,255,${t[2] * 0.7})`);
+    if (pk) for (let k = 0; k < 7; k++) { const a = (k / 6) * 6.2832 + pk.t * 3; dot(pk.x + (k ? Math.cos(a) * 5.5 : 0), pk.y + (k ? Math.sin(a) * 5.5 : 0), k ? 2 : 2.6, pk.c || C.ink); }
+    for (const b of bits) dot(b.x, b.y, 2, `rgba(255,90,78,${b.a})`);
+  };
+  const tick = (now) => {
+    raf = 0;
+    if (pk && pk.to) {
+      const k = Math.min(1, (now - pk.t0) / pk.dur), e = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+      pk.x = pk.from[0] + (pk.to[0] - pk.from[0]) * e; pk.y = pk.from[1] + (pk.to[1] - pk.from[1]) * e;
+      trail.push([pk.x, pk.y, 1]);
+      if (k >= 1) { pk.to = null; pk.done?.(); }
+    }
+    if (pk) pk.t = now / 1000;
+    trail.forEach((t) => (t[2] -= 0.06)); trail = trail.filter((t) => t[2] > 0);
+    bits.forEach((b) => { b.x += b.vx; b.y += b.vy; b.vy += 0.12; b.a -= 0.018; }); bits = bits.filter((b) => b.a > 0);
+    paint();
+    if (visible && (pk || trail.length || bits.length)) raf = requestAnimationFrame(tick);
+  };
+  const go = () => { if (!raf && visible) raf = requestAnimationFrame(tick); };
+  const later = (ms, fn) => timers.push(setTimeout(fn, ms));
+  const move = (to, dur, done) => { pk.from = [pk.x, pk.y]; pk.to = to; pk.t0 = performance.now(); pk.dur = dur; pk.done = done; go(); };
+  const verdict = (i, [v, note]) => {
+    lit[i] = v; const g = gates[i];
+    g.dataset.v = v; $("em", g).textContent = note;
+  };
+  const reset = () => {
+    timers.forEach(clearTimeout); timers = []; lit = []; bits = []; trail = []; pk = null;
+    gates.forEach((g) => { delete g.dataset.v; $("em", g).textContent = ""; });
+    out.textContent = ""; out.classList.remove("on"); cmdEl.textContent = "";
+  };
+  const play = (id) => {
+    reset(); cur = id; box.dataset.call = id;
+    picks.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.call === id)));
+    const c = CALLS[id];
+    if (reduce || !visible) {
+      cmdEl.textContent = c.cmd; c.steps.forEach((s, i) => verdict(i, s)); out.textContent = c.out; out.classList.add("on");
+      const last = c.steps.length - 1; pk = { x: pts[last + 1][0], y: pts[last + 1][1], t: 0, c: c.steps[last][0] === "block" ? C.block : C.ink };
+      paint(); return;
+    }
+    let t = 200;
+    for (let k = 1; k <= c.cmd.length; k++) later((t += 26), () => { cmdEl.textContent = c.cmd.slice(0, k); });
+    later((t += 300), () => {
+      pk = { x: pts[0][0], y: pts[0][1], t: 0 };
+      const step = (i) => {
+        if (i >= c.steps.length) { out.textContent = c.out; out.classList.add("on"); later(4200, () => { if (!chosen) play(ORDER[(ORDER.indexOf(id) + 1) % ORDER.length]); }); return; }
+        const s = c.steps[i], fast = s[0] === "skip";
+        move(pts[i + 1], fast ? 420 : 640, () => {
+          if (s[0] === "block") {
+            verdict(i, s);
+            for (let k = 0; k < 26; k++) { const a = Math.random() * 6.2832, v = 1 + Math.random() * 3; bits.push({ x: pk.x, y: pk.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1.5, a: 1 }); }
+            pk = null; go();
+            later(500, () => step(c.steps.length));
+          } else if (s[0] === "ask") {
+            pk.c = C.ask; verdict(i, ["ask", s[1]]); go();
+            later(1500, () => { verdict(i, ["pass", "you approved it"]); pk.c = null; step(i + 1); });
+          } else { verdict(i, s); later(fast ? 60 : 380, () => step(i + 1)); }
+        });
+      };
+      step(0);
+    });
+  };
+  picks.forEach((b) => b.addEventListener("click", () => { chosen = true; play(b.dataset.call); }));
+  new ResizeObserver(() => { layout(); }).observe(field);
+  new IntersectionObserver(([e]) => {
+    const was = visible; visible = e.isIntersecting;
+    if (visible && !was) { layout(); play(cur || ORDER[0]); }
+    if (!visible) { timers.forEach(clearTimeout); timers = []; }
+  }, { threshold: 0.35 }).observe(box);
+  layout(); play(ORDER[0]);
 })();
