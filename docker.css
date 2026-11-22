@@ -558,3 +558,8 @@ html.lenis, html.lenis body { height: auto; }
 html.lenis, html.lenis-smooth { scroll-behavior: auto !important; }
 html.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 html.lenis-stopped { overflow: hidden; }
+
+/* Cheaper glass on the bar: a smaller blur is far less work to redraw on every scroll frame. */
+html.dk .nav-inner { backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; background: rgba(255, 253, 250, 0.62) !important; }
+html.dk.nav-dark:not(.white) .nav-inner { background: rgba(28, 28, 30, 0.62) !important; }
+html.dk.white.nav-dark .nav-inner { background: rgba(255, 253, 250, 0.62) !important; }

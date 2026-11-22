@@ -546,7 +546,7 @@ if (reduce) document.querySelector(".wordmark")?.pauseAnimations?.();
   const shot = $(".ask-shot");
   // The tour fades in as it comes on screen, and out as it leaves.
   if (shot) new IntersectionObserver(([e]) => shot.classList.toggle("seen", e.isIntersecting), { threshold: 0.25 }).observe(shot);
-  $$(".use-img").forEach((el) => track(el, (e) => el.style.setProperty("--py", pos(e).toFixed(3))));
+  // (The paintings used to follow the scroll with a passing light; redrawing them every step made scrolling stutter.)
   const sign = $(".foot-sign");
   if (sign) track(sign, (e) => sign.style.setProperty("--open", Math.min(1, e.intersectionRatio * 1.4).toFixed(3)));
 })();
@@ -1099,7 +1099,7 @@ function makeOrb(el, size) {
 /* ---------- Smooth scrolling: the page glides to a stop instead of stepping ---------- */
 (function smoothScroll() {
   if (reduce || typeof window.Lenis !== "function" || matchMedia("(pointer: coarse)").matches) return;
-  const lenis = new window.Lenis({ lerp: 0.09, wheelMultiplier: 1, smoothWheel: true });
+  const lenis = new window.Lenis({ lerp: 0.16, wheelMultiplier: 1, smoothWheel: true });
   window.__lenis = lenis;
   const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
   requestAnimationFrame(raf);
