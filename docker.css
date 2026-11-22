@@ -552,3 +552,9 @@ html.dk .faq-cats button:hover { border-color: #101010; }
 html.dk .oses li.mine b::after { color: var(--text-3); }
 html.dk:not(.white) .site-foot .foot-cta { background: #f6f4ef !important; border-color: #f6f4ef !important; color: #101010 !important; }
 html.dk.white .site-foot .foot-cta { background: #101010 !important; border-color: #101010 !important; color: #fffdfa !important; }
+
+/* Smooth scrolling (Lenis): it drives the scroll, so the browser's own smoothing steps aside. */
+html.lenis, html.lenis body { height: auto; }
+html.lenis, html.lenis-smooth { scroll-behavior: auto !important; }
+html.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+html.lenis-stopped { overflow: hidden; }

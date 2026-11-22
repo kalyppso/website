@@ -20,7 +20,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
   <link rel="preload" href="../assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../styles.css">
-  <link rel="stylesheet" href="../docker.css?v=14">
+  <link rel="stylesheet" href="../docker.css?v=16">
 </head>
 <body class="blog-page">
   <header class="nav">
@@ -48,7 +48,7 @@
         <h1>Your agents shouldn&#x27;t hold your keys</h1>
         <p class="post-lead">An agent that can read a key can leak it. So in KALYPSO, agents never get one. Here is how the keys stay home, and what changed this week.</p>
       </header>
-      <div class="post-cover wide"><img src="../assets/art/shell-3.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
+      <div class="post-cover wide"><img src="../assets/art/glass-1.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
       <div class="post-body">
 <p>The quickest way to give an agent a model is to paste an API key into its environment. It's also the quickest way to lose that key: anything the agent can read, it can print, log, commit or send somewhere. KALYPSO starts from the other end. Agents never hold your real keys.</p>
 <h2>A stand-in key, swapped at the gateway</h2>
@@ -100,7 +100,8 @@
     <div class="foot-base"><span>&copy; 2026 KALYPSO. Open source under the <a href="https://github.com/kalyppso/kalypso/blob/main/LICENSE">MIT License</a>.</span><span>Built for people who let agents do real work.</span></div>
   </footer>
 
-  <script src="../main.js?v=15" defer></script>
+  <script src="../assets/vendor/lenis.min.js" defer></script>
+  <script src="../main.js?v=16" defer></script>
   <script>/* The floating bar turns dark over the dark bands, like the reference. */
     (function () {
       var bands = document.querySelectorAll(".band-dark"), on = new Set();

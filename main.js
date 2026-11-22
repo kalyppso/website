@@ -1095,3 +1095,23 @@ function makeOrb(el, size) {
   addEventListener("keydown", (e) => { if (e.key === "Escape" && !panel.hidden) { set(false); btn.focus(); } });
   document.addEventListener("pointerdown", (e) => { if (!panel.hidden && !wrap.contains(e.target) && !panel.contains(e.target)) set(false); });
 })();
+
+/* ---------- Smooth scrolling: the page glides to a stop instead of stepping ---------- */
+(function smoothScroll() {
+  if (reduce || typeof window.Lenis !== "function" || matchMedia("(pointer: coarse)").matches) return;
+  const lenis = new window.Lenis({ lerp: 0.09, wheelMultiplier: 1, smoothWheel: true });
+  window.__lenis = lenis;
+  const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
+  requestAnimationFrame(raf);
+  // In-page links glide too, stopping clear of the floating bar.
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest?.('a[href^="#"]');
+    if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey) return;
+    const id = a.getAttribute("href").slice(1);
+    const el = id ? document.getElementById(id) : null;
+    if (!el && id !== "top" && id !== "") return;
+    e.preventDefault();
+    lenis.scrollTo(el && id !== "top" ? el : 0, { offset: -84, duration: 1.2 });
+    history.replaceState(null, "", "#" + id);
+  });
+})();

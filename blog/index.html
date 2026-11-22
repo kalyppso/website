@@ -20,7 +20,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
   <link rel="preload" href="../assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../styles.css">
-  <link rel="stylesheet" href="../docker.css?v=14">
+  <link rel="stylesheet" href="../docker.css?v=16">
 </head>
 <body class="blog-page">
   <header class="nav">
@@ -48,15 +48,15 @@
     </section>
     <section class="blog-list">
       <a class="post-card featured" href="keys-stay-home.html">
-        <div class="post-cover "><img src="../assets/art/shell-3.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
+        <div class="post-cover "><img src="../assets/art/glass-1.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
         <div class="post-card-copy"><p class="post-meta"><span class="tag">Security</span><time datetime="2026-11-15">November 15, 2026</time></p><h2>Your agents shouldn&#x27;t hold your keys</h2><p>An agent that can read a key can leak it. So in KALYPSO, agents never get one. Here is how the keys stay home, and what changed this week.</p></div>
       </a>
       <a class="post-card" href="any-provider-egress-board.html">
-        <div class="post-cover "><img src="../assets/art/shell-2.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
+        <div class="post-cover "><img src="../assets/art/glass-3.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
         <div class="post-card-copy"><p class="post-meta"><span class="tag">Product</span><time datetime="2026-11-14">November 14, 2026</time></p><h2>Any AI provider, an egress proxy and Board tasks</h2><p>Three larger pieces landed on main: bring any model, keep each sandbox&#x27;s traffic on a leash, and hand work out as tasks. They ship in the next release.</p></div>
       </a>
       <a class="post-card" href="meet-kalypso.html">
-        <div class="post-cover "><img src="../assets/art/shell-0.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
+        <div class="post-cover "><img src="../assets/art/glass-0.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
         <div class="post-card-copy"><p class="post-meta"><span class="tag">Release</span><time datetime="2026-11-13">November 13, 2026</time></p><h2>Meet kalypso: one chat that runs your crew</h2><p>KALYPSO 0.2.2 beta adds kalypso, an agent you talk to that plans the work and hands it to the rest of your crew.</p></div>
       </a>
     </section>
@@ -94,7 +94,8 @@
     <div class="foot-base"><span>&copy; 2026 KALYPSO. Open source under the <a href="https://github.com/kalyppso/kalypso/blob/main/LICENSE">MIT License</a>.</span><span>Built for people who let agents do real work.</span></div>
   </footer>
 
-  <script src="../main.js?v=15" defer></script>
+  <script src="../assets/vendor/lenis.min.js" defer></script>
+  <script src="../main.js?v=16" defer></script>
   <script>/* The floating bar turns dark over the dark bands, like the reference. */
     (function () {
       var bands = document.querySelectorAll(".band-dark"), on = new Set();

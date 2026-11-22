@@ -20,7 +20,7 @@
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
   <link rel="preload" href="../assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../styles.css">
-  <link rel="stylesheet" href="../docker.css?v=14">
+  <link rel="stylesheet" href="../docker.css?v=16">
 </head>
 <body class="blog-page">
   <header class="nav">
@@ -48,7 +48,7 @@
         <h1>Any AI provider, an egress proxy and Board tasks</h1>
         <p class="post-lead">Three larger pieces landed on main: bring any model, keep each sandbox&#x27;s traffic on a leash, and hand work out as tasks. They ship in the next release.</p>
       </header>
-      <div class="post-cover wide"><img src="../assets/art/shell-2.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
+      <div class="post-cover wide"><img src="../assets/art/glass-3.webp" alt="" width="1280" height="800" loading="lazy" decoding="async"></div>
       <div class="post-body">
 <h2>Any AI provider</h2>
 <p>KALYPSO started with Claude. Agents can now use any OpenAI-compatible provider as well: OpenAI, OpenRouter, Groq, Mistral and others, or a local model through Ollama. Pick one for each agent, set how hard it should think, and add any other provider by its base URL. The gateway meters and caps them all the same way.</p>
@@ -94,7 +94,8 @@
     <div class="foot-base"><span>&copy; 2026 KALYPSO. Open source under the <a href="https://github.com/kalyppso/kalypso/blob/main/LICENSE">MIT License</a>.</span><span>Built for people who let agents do real work.</span></div>
   </footer>
 
-  <script src="../main.js?v=15" defer></script>
+  <script src="../assets/vendor/lenis.min.js" defer></script>
+  <script src="../main.js?v=16" defer></script>
   <script>/* The floating bar turns dark over the dark bands, like the reference. */
     (function () {
       var bands = document.querySelectorAll(".band-dark"), on = new Set();
